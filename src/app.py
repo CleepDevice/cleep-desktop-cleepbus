@@ -14,10 +14,14 @@ def send_message_to_bus(message):
     logging.info("Message to send to bus: %r", message)
 
 
+def show_version():
+    print(VERSION)
+
+
 # command line arguments
 CONFIG = {"websocket": True, "uuid": None}
 try:
-    opts, args = getopt.getopt(sys.argv[1:], "nu:", ["no-ws", "uuid"])
+    opts, args = getopt.getopt(sys.argv[1:], "nu:v", ["no-ws", "uuid", "version"])
 except Exception:
     logging.exception("Invalid command arguments")
     sys.exit(2)
@@ -27,6 +31,9 @@ for opt, arg in opts:
         CONFIG["websocket"] = False
     if opt in ("-u", "--uuid"):
         CONFIG["uuid"] = arg
+    if opt in ("-v", "--version"):
+        show_version()
+        sys.exit(0)
 logging.debug("Config: %s", CONFIG)
 
 logging.info("========== cleep-desktop-cleepbus v%s started ==========", VERSION)
