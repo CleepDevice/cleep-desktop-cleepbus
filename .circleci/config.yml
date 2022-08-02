@@ -51,3 +51,15 @@ workflows:
           filters:
             branches:
               only: master
+  windows64:
+    jobs:
+      - publish-windows64:
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
+      - build-windows64:
+          filters:
+            branches:
+              only: master
