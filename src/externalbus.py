@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from common import MessageRequest, MessageResponse
 import logging
 import uuid
-from threading import Event
+from common import MessageRequest, MessageResponse
 
 
 class ExternalBus:
@@ -82,7 +81,7 @@ class ExternalBus:
             Must be implemented
         """
         raise NotImplementedError(
-            'run function must be implemented in "%s"' % self.__class__.__name__
+            f'run function must be implemented in "{self.__class__.__name__}"'
         )
 
     def run_once(self):
@@ -93,7 +92,7 @@ class ExternalBus:
             Must be implemented
         """
         raise NotImplementedError(
-            'run_once function must be implemented in "%s"' % self.__class__.__name__
+            f'run_once function must be implemented in "{self.__class__.__name__}"'
         )
 
     def __ack_command_with_response(self, message):
@@ -103,11 +102,11 @@ class ExternalBus:
         Args:
             message (MessageRequest): message request
         """
-        self.logger.debug("Send internal command response: %s" % str(message))
+        self.logger.debug("Send internal command response: %s", message)
         if not message.command_uuid in self.__manual_responses:
             self.logger.warning(
-                'Command with uuid "%s" not referenced for sending response'
-                % message.command_uuid
+                'Command with uuid "%s" not referenced for sending response',
+                message.command_uuid,
             )
             return
 
@@ -116,7 +115,7 @@ class ExternalBus:
         response.fill_from_dict(message.params)
 
         # ack command
-        self.logger.debug("Send internal command response back: %s" % str(response))
+        self.logger.debug("Send internal command response back: %s", response)
         if self.__manual_responses[message.command_uuid]["manual_response"]:
             self.__manual_responses[message.command_uuid]["manual_response"](response)
         else:
@@ -142,20 +141,19 @@ class ExternalBus:
 
         # process message
         response = self._on_message_received(peer_id, message)
-        self.logger.debug("Command response: %s" % response)
+        self.logger.debug("Command response: %s", response)
 
         if response and message.is_command():
             # it's a command, response awaited
             if not message.command_uuid:
                 self.logger.warning(
-                    "Unable to send command response because command uuid is missing in %s"
-                    % message
+                    "Unable to send command response because command uuid is missing in %s",
+                    message,
                 )
                 return
             if not isinstance(response, MessageResponse):
                 raise Exception(
-                    'Command response must be a MessageResponse instance not "%s"'
-                    % type(response).__name__
+                    f'Command response must be a MessageResponse instance not "{type(response).__name__}"'
                 )
             self._send_command_response_to_peer(message, response)
 
@@ -168,8 +166,8 @@ class ExternalBus:
             response (MessageResponse): message response
         """
         # convert response to request
-        self.logger.trace("request: %s" % request)
-        self.logger.trace("response: %s" % response)
+        self.logger.trace("request: %s", request)
+        self.logger.trace("response: %s", response)
         message = MessageRequest()
         message.event = ExternalBus.COMMAND_RESPONSE_EVENT
         message.params = response.to_dict()  # store message response in event params
@@ -177,7 +175,7 @@ class ExternalBus:
         message.peer_infos = request.peer_infos
 
         # and send created request
-        self.logger.debug("Send command response to peer: %s" % message)
+        self.logger.debug("Send command response to peer: %s", message)
         self._send_message(message)
 
     def send_message(self, message, timeout=5.0, manual_response=None):
@@ -218,8 +216,7 @@ class ExternalBus:
             Must be implemented
         """
         raise NotImplementedError(
-            'broadcast_message function is not implemented "%s"'
-            % self.__class__.__name__
+            f'broadcast_message function is not implemented "{self.__class__.__name__}"'
         )
 
     def _send_message(self, message):
@@ -233,5 +230,5 @@ class ExternalBus:
             Must be implemented
         """
         raise NotImplementedError(
-            'send_message function is not implemented "%s"' % self.__class__.__name__
+            f'send_message function is not implemented "{self.__class__.__name__}"'
         )

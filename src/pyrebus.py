@@ -9,13 +9,13 @@ import binascii
 import os
 import ipaddress
 from urllib.parse import urlparse
-from externalbus import ExternalBus
-from common import MessageRequest, MessageResponse
+import netifaces
+import netaddr
 from pyre_gevent import Pyre
 from pyre_gevent.zhelper import get_ifaddrs as zhelper_get_ifaddrs, u
 import zmq.green as zmq
-import netifaces
-import netaddr
+from externalbus import ExternalBus
+from common import MessageRequest
 
 
 class PyreBus(ExternalBus):
@@ -80,7 +80,8 @@ class PyreBus(ExternalBus):
         self.__bus_channel = None
         self.endpoint = None
 
-    def get_network_interfaces_names(self):
+    @staticmethod
+    def get_network_interfaces_names():
         """
         Return network interfaces names
 
@@ -90,7 +91,7 @@ class PyreBus(ExternalBus):
         out = []
         netinf = zhelper_get_ifaddrs()
         for iface in netinf:
-            for name, data in iface.items():
+            for name, _ in iface.items():
                 out.append(name)
 
         return out
@@ -109,19 +110,19 @@ class PyreBus(ExternalBus):
             # Loop over the interfaces and their settings to try to find the broadcast address.
             # ipv4 only currently and needs a valid broadcast address
             for name, data in iface.items():
-                self.logger.debug('Checking out interface "%s": %s' % (name, data))
+                self.logger.debug('Checking out interface "%s": %s', name, data)
                 data_2 = data.get(netifaces.AF_INET, None)
                 data_10 = data.get(netifaces.AF_INET6, None)
                 data_17 = data.get(netifaces.AF_LINK, None)
                 # workaround: fallback to netifaces module to find mac addr
                 if not data_17 and data_2:
-                    data_17 = self.__get_mac_addresses_from_netifaces(data_2)
+                    data_17 = self.get_mac_addresses_from_netifaces(data_2)
 
                 if not data_2 and not data_10:
-                    self.logger.debug('AF_INET(6) not found for interface "%s".' % name)
+                    self.logger.debug('AF_INET(6) not found for interface "%s".', name)
                     continue
                 if not data_17:
-                    self.logger.debug('AF_LINK not found for interface "%s".' % name)
+                    self.logger.debug('AF_LINK not found for interface "%s".', name)
                     continue
 
                 address_str = (data_2 and data_2.get("addr", None)) or (
@@ -134,13 +135,11 @@ class PyreBus(ExternalBus):
 
                 if not address_str or not netmask_str:
                     self.logger.debug(
-                        'Address or netmask not found for interface "%s".' % name
+                        'Address or netmask not found for interface "%s".', name
                     )
                     continue
                 if not mac_str:
-                    self.logger.debug(
-                        'Mac address not found for interface "%s".' % name
-                    )
+                    self.logger.debug('Mac address not found for interface "%s".', name)
                     continue
 
                 if isinstance(address_str, bytes):  # pragma: no cover
@@ -156,12 +155,12 @@ class PyreBus(ExternalBus):
                 interface = ipaddress.ip_interface(u(address_str))
                 if interface.is_loopback:
                     self.logger.debug(
-                        'Interface "%s" is a loopback device, drop it.' % name
+                        'Interface "%s" is a loopback device, drop it.', name
                     )
                     continue
                 if interface.is_link_local:
                     self.logger.debug(
-                        'Interface "%s" is a link-local device, drop it.' % name
+                        'Interface "%s" is a link-local device, drop it.', name
                     )
                     continue
 
@@ -169,7 +168,7 @@ class PyreBus(ExternalBus):
                 ip_address = netaddr.IPAddress(address_str)
                 if ip_address and not ip_address.is_private():
                     self.logger.debug(
-                        'Interface "%s" refers to public ip address, drop it.' % name
+                        'Interface "%s" refers to public ip address, drop it.', name
                     )
                     continue
 
@@ -177,7 +176,8 @@ class PyreBus(ExternalBus):
 
         return macs
 
-    def __get_mac_addresses_from_netifaces(self, data_2):
+    @staticmethod
+    def get_mac_addresses_from_netifaces(data_2):
         """
         Workaround to find mac addresses when not found using zhelper
 
@@ -226,9 +226,9 @@ class PyreBus(ExternalBus):
                 self.node and self.node.stop()
             except zmq.ZMQError:  # pragma: no cover
                 pass
-            except AssertionError as e:
+            except AssertionError as error:
                 # this assertion occurs when cleep-desktop is stopping when pyrebus is not connected
-                if str(e) != "Only one greenlet can be waiting on this event":
+                if str(error) != "Only one greenlet can be waiting on this event":
                     self.logger.exception("Exception stopping pyre node")
             except Exception:
                 self.logger.exception("Exception stopping pyre node")
@@ -282,7 +282,7 @@ class PyreBus(ExternalBus):
         self.pipe_out.setsockopt(zmq.SNDTIMEO, 5000)
         self.pipe_out.setsockopt(zmq.RCVTIMEO, 5000)
 
-        iface = "inproc://%s" % binascii.hexlify(os.urandom(8))
+        iface = f"inproc://{binascii.hexlify(os.urandom(8))}"
         self.pipe_in.bind(iface)
         self.pipe_out.connect(iface)
 
@@ -305,7 +305,7 @@ class PyreBus(ExternalBus):
 
         # check endpoint
         self.endpoint = self.node.endpoint()
-        self.logger.info('Connected to cleepbus endpoint "%s"' % self.endpoint)
+        self.logger.info('Connected to cleepbus endpoint "%s"', self.endpoint)
         return self.endpoint.find("127.0.0.1") == -1
 
     def is_running(self):
@@ -364,13 +364,12 @@ class PyreBus(ExternalBus):
         data_type = data.pop(0).decode("utf-8")
         data_peer = uuid.UUID(bytes=data.pop(0))
         data_name = data.pop(0).decode("utf-8")
-        self.logger.debug("type=%s peer=%s name=%s" % (data_type, data_peer, data_name))
+        self.logger.debug("type=%s peer=%s name=%s", data_type, data_peer, data_name)
 
         # check message origin
         if data_name != self.__bus_name:
             self.logger.debug(
-                "Peer connected from another bus: peer=%s bus=%s"
-                % (data_peer, data_name)
+                "Peer connected from another bus: peer=%s bus=%s", data_peer, data_name
             )
             return True
 
@@ -384,36 +383,37 @@ class PyreBus(ExternalBus):
                 if data_group != self.__bus_channel:
                     # invalid group
                     self.logger.debug(
-                        'Message received from another channel "%s" (current "%s")'
-                        % (data_group, self.__bus_channel)
+                        'Message received from another channel "%s" (current "%s")',
+                        data_group,
+                        self.__bus_channel,
                     )
                     return True
 
             # trigger message received callback
             try:
                 data_content = data.pop(0).decode("utf-8")
-                self.logger.debug("Raw data received on bus: %s" % data_content)
+                self.logger.debug("Raw data received on bus: %s", data_content)
                 raw_message = json.loads(data_content)
                 message = MessageRequest()
                 message.fill_from_dict(raw_message)
-                self.logger.debug("Message request received: %s" % str(message))
+                self.logger.debug("Message request received: %s", str(message))
                 self.on_message_received(str(data_peer), message)
             except Exception:
-                self.logger.exception("Error parsing peer message:")
+                self.logger.exception("Error parsing peer message")
 
         elif data_type == "ENTER":
             # get message data
             infos = json.loads(data.pop(0).decode("utf-8"))
-            self.logger.debug("Infos=%s" % infos)
+            self.logger.debug("Infos=%s", infos)
             # get peer endpoint
-            self.logger.debug("Peer endpoint: %s" % self.node.peer_address(data_peer))
+            self.logger.debug("Peer endpoint: %s", self.node.peer_address(data_peer))
             peer_endpoint = urlparse(self.node.peer_address(data_peer))
 
             # add new peer
             try:
                 # decode peer infos
                 peer_infos = self.decode_peer_infos(infos)
-                self.logger.debug("Peer infos: %s" % str(peer_infos))
+                self.logger.debug("Peer infos: %s", str(peer_infos))
                 # add extras to peer infos
                 peer_infos.ident = str(data_peer)
                 peer_infos.ip = peer_endpoint.hostname
@@ -431,7 +431,8 @@ class PyreBus(ExternalBus):
 
         return True
 
-    def _clean_message(self, message):
+    @staticmethod
+    def clean_message(message):
         """
         Clean message removing useless field for external messaging
 
@@ -458,7 +459,7 @@ class PyreBus(ExternalBus):
         # message to send
         try:
             data = self.pipe_out.recv()
-            self.logger.debug("Raw data received on pipe: %s" % data)
+            self.logger.debug("Raw data received on pipe: %s", data)
             raw_message = json.loads(data.decode("utf-8"))
         except Exception:
             self.logger.exception("Error handling message to send")
@@ -473,18 +474,18 @@ class PyreBus(ExternalBus):
         # send message
         message = MessageRequest()
         message.fill_from_dict(raw_message)
-        self.logger.debug("Send message: %s" % message)
-        cleaned_message = self._clean_message(message)
+        self.logger.debug("Send message: %s", message)
+        cleaned_message = self.clean_message(message)
         if message.peer_infos and message.peer_infos.ident:
             # whisper message (to peer)
-            self.logger.debug("Whisper message: %s" % cleaned_message)
+            self.logger.debug("Whisper message: %s", cleaned_message)
             self.node.whisper(
                 uuid.UUID(message.peer_infos.ident),
                 json.dumps(cleaned_message).encode("utf-8"),
             )
         else:
             # shout message (broadcast)
-            self.logger.debug("Shout message: %s" % cleaned_message)
+            self.logger.debug("Shout message: %s", cleaned_message)
             self.node.shout(
                 self.__bus_channel, json.dumps(cleaned_message).encode("utf-8")
             )

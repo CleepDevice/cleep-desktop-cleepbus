@@ -1,3 +1,7 @@
+import copy
+from exception import InvalidMessage
+
+
 class InternalMessage:
     """
     Handle internal message to process it according to type
@@ -33,7 +37,7 @@ class PeerInfos:
         ssl=False,
         macs=None,
         cleepdesktop=False,
-        extra={},
+        extra=None,
     ):
         """
         Constructor
@@ -68,7 +72,7 @@ class PeerInfos:
         self.macs = macs
         self.cleepdesktop = cleepdesktop
         self.online = False
-        self.extra = extra
+        self.extra = extra or {}
 
     def to_dict(self, with_extra=False):
         """
@@ -92,7 +96,8 @@ class PeerInfos:
             "online": self.online,
             "extra": self.extra,
         }
-        with_extra and out.update({"extra": self.extra})
+        if with_extra:
+            out.update({"extra": self.extra})
         return out
 
     def __str__(self):
@@ -102,17 +107,20 @@ class PeerInfos:
         Returns:
             string: peer infos as string
         """
-        return "PeerInfos(uuid:%s, ident:%s, hostname:%s, ip:%s port:%s, ssl:%s, macs:%s, cleepdesktop:%s, online:%s, extra:%s)" % (
-            self.uuid,
-            self.ident,
-            self.hostname,
-            self.ip,
-            self.port,
-            self.ssl,
-            self.macs,
-            self.cleepdesktop,
-            self.online,
-            self.extra,
+        return (
+            "PeerInfos(uuid:%s, ident:%s, hostname:%s, ip:%s port:%s, ssl:%s, macs:%s, cleepdesktop:%s, online:%s, extra:%s)"
+            % (
+                self.uuid,
+                self.ident,
+                self.hostname,
+                self.ip,
+                self.port,
+                self.ssl,
+                self.macs,
+                self.cleepdesktop,
+                self.online,
+                self.extra,
+            )
         )
 
     def fill_from_dict(self, peer_infos):
@@ -135,7 +143,7 @@ class PeerInfos:
         self.extra = copy.deepcopy(peer_infos.get("extra", {}))
 
 
-class MessageResponse(object):
+class MessageResponse:
     """
     Object that holds message response
 
@@ -210,7 +218,7 @@ class MessageResponse(object):
         self.data = response.get("data", None)
 
 
-class MessageRequest(object):
+class MessageRequest:
     """
     Object that holds message request
 
@@ -247,7 +255,7 @@ class MessageRequest(object):
         A message cannot be a command and an event, priority to command if both are specified.
     """
 
-    def __init__(self, command=None, event=None, params={}, to=None):
+    def __init__(self, command=None, event=None, params=None, to=None):
         """
         Constructor
 
@@ -259,7 +267,7 @@ class MessageRequest(object):
         """
         self.command = command
         self.event = event
-        self.params = params
+        self.params = params or {}
         self.to = to
         self.propagate = False
         self.sender = None
@@ -273,26 +281,35 @@ class MessageRequest(object):
         Stringify function
         """
         if self.command:
-            return "MessageRequest(command:%s, params:%s, to:%s, sender:%s, device_id:%s, peer_infos:%s, command_uuid:%s, timeout:%s)" % (
-                self.command,
-                str(self.params),
-                self.to,
-                self.sender,
-                self.device_id,
-                self.peer_infos.to_dict() if self.peer_infos else None,
-                self.command_uuid,
-                self.timeout,
+            msg = (
+                "MessageRequest(command:%s, params:%s, to:%s, sender:%s, device_id:%s, peer_infos:%s, command_uuid:%s, timeout:%s"
+                % (
+                    self.command,
+                    str(self.params),
+                    self.to,
+                    self.sender,
+                    self.device_id,
+                    self.peer_infos.to_dict() if self.peer_infos else None,
+                    self.command_uuid,
+                    self.timeout,
+                )
             )
-        elif self.event:
-            return "MessageRequest(event:%s, propagate:%s, params:%s, to:%s, device_id:%s, peer_infos:%s, command_uuid:%s)" % (
-                self.event,
-                self.propagate,
-                str(self.params),
-                self.to,
-                self.device_id,
-                self.peer_infos.to_dict() if self.peer_infos else None,
-                self.command_uuid,
+            return msg
+
+        if self.event:
+            msg = (
+                "MessageRequest(event:%s, propagate:%s, params:%s, to:%s, device_id:%s, peer_infos:%s, command_uuid:%s)"
+                % (
+                    self.event,
+                    self.propagate,
+                    str(self.params),
+                    self.to,
+                    self.device_id,
+                    self.peer_infos.to_dict() if self.peer_infos else None,
+                    self.command_uuid,
+                )
             )
+            return msg
 
         return "MessageRequest(Invalid message)"
 
@@ -303,7 +320,7 @@ class MessageRequest(object):
         Returns:
             bool: True if the request is broadcast
         """
-        return True if self.to is None else False
+        return self.to is None
 
     def is_command(self):
         """
@@ -312,7 +329,7 @@ class MessageRequest(object):
         Returns:
             bool: True if message is a command, otherwise it is an event
         """
-        return True if self.command else False
+        return bool(self.command)
 
     def is_external_event(self):
         """
@@ -321,7 +338,7 @@ class MessageRequest(object):
         Returns:
             bool: True if event comes from external device
         """
-        return True if self.peer_infos is not None else False
+        return self.peer_infos is not None
 
     def to_dict(self, startup=False, external_sender=None):
         """
@@ -344,7 +361,7 @@ class MessageRequest(object):
                 "broadcast": self.is_broadcast(),
             }
 
-        elif self.event and not self.peer_infos:
+        if self.event and not self.peer_infos:
             # internal event
             return {
                 "event": self.event,
@@ -355,7 +372,7 @@ class MessageRequest(object):
                 "sender": self.sender,
             }
 
-        elif self.command and self.peer_infos:
+        if self.command and self.peer_infos:
             # external command
             return {
                 "command": self.command,
@@ -368,7 +385,7 @@ class MessageRequest(object):
                 "timeout": self.timeout,
             }
 
-        elif self.event and self.peer_infos:
+        if self.event and self.peer_infos:
             # external event
             return {
                 "event": self.event,
@@ -380,8 +397,7 @@ class MessageRequest(object):
                 "command_uuid": self.command_uuid,
             }
 
-        else:
-            raise InvalidMessage()
+        raise InvalidMessage()
 
     def fill_from_request(self, request):
         """
@@ -406,26 +422,26 @@ class MessageRequest(object):
             self.peer_infos = PeerInfos()
             self.peer_infos.fill_from_dict(request.peer_infos.to_dict(True))
 
-    def fill_from_dict(self, request):
+    def fill_from_dict(self, message):
         """
         Fill instance from other request
 
         Args:
             request (dict): message request infos
         """
-        if not isinstance(request, dict):
-            raise Exception('Parameter "request" must be a dict')
+        if not isinstance(message, dict):
+            raise Exception('Parameter "message" must be a dict')
 
-        self.command = request.get("command", None)
-        self.event = request.get("event", None)
-        self.propagate = request.get("propagate", False)
-        self.params = copy.deepcopy(request.get("params", {}))
-        self.to = request.get("to", None)
-        self.sender = request.get("sender", None)
-        self.device_id = request.get("device_id", None)
-        self.command_uuid = request.get("command_uuid", None)
-        self.timeout = request.get("timeout", 5.0)
+        self.command = message.get("command", None)
+        self.event = message.get("event", None)
+        self.propagate = message.get("propagate", False)
+        self.params = copy.deepcopy(message.get("params", {}))
+        self.to = message.get("to", None)
+        self.sender = message.get("sender", None)
+        self.device_id = message.get("device_id", None)
+        self.command_uuid = message.get("command_uuid", None)
+        self.timeout = message.get("timeout", 5.0)
         self.peer_infos = None
-        if request.get("peer_infos", None):
+        if message.get("peer_infos", None):
             self.peer_infos = PeerInfos()
-            self.peer_infos.fill_from_dict(request.get("peer_infos"))
+            self.peer_infos.fill_from_dict(message.get("peer_infos"))
