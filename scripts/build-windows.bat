@@ -16,7 +16,7 @@ echo.
 echo.
 echo Packaging application...
 echo ------------------------
-xcopy /q /y config\windows.spec pyinstaller.spec
+xcopy /q /y scripts\windows.spec pyinstaller.spec
 py -3 -m PyInstaller --clean --noconfirm --windowed --log-level INFO pyinstaller.spec
 if %ERRORLEVEL% NEQ 0 goto :error
 del /q pyinstaller.spec
