@@ -9,22 +9,20 @@ jobs:
       shell: powershell.exe
     steps:
       - checkout
-      - run: npm run publish-win64
+      - run: scripts/publish-windows.bat
   build-windows64:
     executor:
       name: win/default
       shell: powershell.exe
     steps:
       - checkout
-      - run: npm run build-win64
+      - run: scripts/build-windows.bat
   publish-linux64:
     docker:
       - image: cimg/base:edge
     steps:
-      - run: curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -
-      - run: sudo apt-get install -y nodejs
       - checkout
-      - run: npm run publish-linux64-circleci
+      - run: scripts/publish-linux-circleci.sh
   build-linux64:
     docker:
       - image: cimg/base:edge

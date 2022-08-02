@@ -55,3 +55,20 @@ echo "Generated files"
 echo "---------------"
 ls -l dist/cleepbus
 
+echo
+echo
+echo "Getting version..."
+echo "------------------"
+VERSION=`dist/cleepbus/cleepbus --version`
+echo "Found version $VERSION"
+
+echo
+echo
+echo "Packaging application..."
+echo "------------------------"
+cd dist/cleepbus
+ARCHIVE="cleepbus-v$VERSION-linux-x64.zip"
+zip -q -8 -r "../$ARCHIVE" .
+checkResult $? 0 "Failed to package cleepbus application"
+echo "Package $ARCHIVE built successfully"
+
