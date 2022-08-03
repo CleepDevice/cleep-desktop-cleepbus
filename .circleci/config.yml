@@ -11,7 +11,8 @@ jobs:
       - run: scripts/build-linux-circleci.sh
       - persist_to_workspace:
           root: dist
-          paths: *
+          paths:
+            - *
   package:
     docker:
       - image: cimg/base:edge
