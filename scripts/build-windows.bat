@@ -16,8 +16,8 @@ echo.
 echo.
 echo Packaging application...
 echo ------------------------
-xcopy /q /y scripts\windows.spec pyinstaller.spec
-py -3 -m PyInstaller --clean --noconfirm --windowed --log-level INFO pyinstaller.spec
+copy scripts\windows.spec pyinstaller.spec
+py -3 -m PyInstaller --clean --log-level INFO pyinstaller.spec
 if %ERRORLEVEL% NEQ 0 goto :error
 del /q pyinstaller.spec
 
@@ -25,17 +25,38 @@ echo.
 echo.
 echo Generated files
 echo ---------------
-dir dist\cleepdesktopcore
+dir dist\cleepbus
 
 echo.
 echo.
 echo Getting version
 echo ---------------
+cd dist\cleepbus
+$VERSION=.\cleepbus.exe --version > version.txt
+echo "Found version $VERSION"
 
+echo.
+echo.
+echo Packaging application...
+echo ------------------------
+Compress-Archive * "../cleepbus-v$VERSION-windows-x64.zip"
+if %ERRORLEVEL% NEQ 0 goto :error
+echo Package build successfully
+
+cd ..\..
 
 goto :success
 
 :error
+echo.
+echo.
 echo ===== Error occured see above =====
+goto :end
 
 :success
+echo.
+echo.
+echo Build successful
+goto :end
+
+:end
