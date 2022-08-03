@@ -12,7 +12,7 @@ jobs:
       - persist_to_workspace:
           root: dist
           paths:
-            - *
+            - dist/*
   package:
     docker:
       - image: cimg/base:edge
