@@ -12,7 +12,9 @@ jobs:
       - persist_to_workspace:
           root: dist
           paths:
-            - dist/*
+            - cleepbus/*
+            - version.txt
+            - platform.txt
   package:
     docker:
       - image: cimg/base:edge
