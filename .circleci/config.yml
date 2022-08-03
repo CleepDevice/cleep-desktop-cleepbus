@@ -1,63 +1,50 @@
 version: 2.1
 orbs:
-  win: circleci/windows@2.4.0
-  slack: circleci/slack@4.4.0
+  win: circleci/windows@5.0.0
+  slack: circleci/slack@4.10.1
 jobs:
-  publish-windows64:
-    executor:
-      name: win/default
-      shell: powershell.exe
-    steps:
-      - checkout
-      - run: scripts/publish-windows.bat
-  build-windows64:
-    executor:
-      name: win/default
-      shell: powershell.exe
-    steps:
-      - checkout
-      - run: scripts/build-windows.bat
-  publish-linux64:
-    docker:
-      - image: cimg/base:edge
-    steps:
-      - checkout
-      - run: scripts/publish-linux-circleci.sh
-  build-linux64:
+  build-linux:
     docker:
       - image: cimg/base:edge
     steps:
       - checkout
       - run: scripts/build-linux-circleci.sh
+      - persist_to_workspace:
+          root: dist
+  package:
+    docker:
+      - image: cimg/base:edge
+    steps:
+      - attach_workspace:
+          at: dist
+      - run: ls -l
+      - run: |
+          VERSION=`cat dist/version.txt`
+          PLATFORM=`cat dist/platform.txt`
+          ARCHIVE="cleepbus-v$VERSION-$PLATFORM-x64.zip"
+          cd dist/cleepbus
+          zip -q -8 -r "../$ARCHIVE" .
+          echo "Package $ARCHIVE built successfully"
+  notify:
+    docker:
+      - image: cimg/base:stable
+    resource_class: small
+    steps:
       - slack/notify:
           event: fail
           template: basic_fail_1
       - slack/notify:
           event: pass
           template: basic_success_1
+
 workflows:
   version: 2
-  linux64:
+  linux:
     jobs:
-      - publish-linux64:
-          filters:
-            tags:
-              only: /^v.*/
-            branches:
-              ignore: /.*/
-      - build-linux64:
+      - build-linux:
           filters:
             branches:
               only: master
-  windows64:
-    jobs:
-      - publish-windows64:
-          filters:
-            tags:
-              only: /^v.*/
-            branches:
-              ignore: /.*/
-      - build-windows64:
-          filters:
-            branches:
-              only: master
+      - package:
+          requires:
+            - build-linux
