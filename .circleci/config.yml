@@ -92,7 +92,7 @@ jobs:
 
 workflows:
   version: 2
-  test:
+  linux:
     jobs:
       - build-linux:
           filters:
@@ -100,9 +100,6 @@ workflows:
               only: /.*/
             branches:
               only: master
-  linux:
-    jobs:
-      - build-linux
       - package:
           requires:
             - build-linux
@@ -121,7 +118,12 @@ workflows:
               ignore: /.*/
   windows:
     jobs:
-      - build-windows
+      - build-windows:
+          filters:
+            tags:
+              only: /.*/
+            branches:
+              only: master
       - package:
           requires:
             - build-windows
@@ -140,7 +142,12 @@ workflows:
               ignore: /.*/
   macos:
     jobs:
-      - build-macos
+      - build-macos:
+          filters:
+            tags:
+              only: /.*/
+            branches:
+              only: master
       - package:
           requires:
             - build-macos
