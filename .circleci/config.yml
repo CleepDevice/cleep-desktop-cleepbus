@@ -64,3 +64,6 @@ workflows:
       - package:
           requires:
             - build-linux
+      - publish:
+          requires:
+            - package
