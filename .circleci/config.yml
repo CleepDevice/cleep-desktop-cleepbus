@@ -92,6 +92,9 @@ jobs:
 
 workflows:
   version: 2
+  test:
+    jobs:
+      - build-linux
   linux:
     jobs:
       - build-linux
