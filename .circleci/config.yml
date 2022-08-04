@@ -67,7 +67,7 @@ workflows:
   version: 2
   linux:
     jobs:
-      - build-linux:
+      - build-linux
       - package:
           requires:
             - build-linux
