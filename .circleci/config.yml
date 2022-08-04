@@ -29,9 +29,16 @@ jobs:
           VERSION=`cat dist/version.txt`
           PLATFORM=`cat dist/platform.txt`
           ARCHIVE="cleepbus-v$VERSION-$PLATFORM-x64.zip"
+          mkdir package
           cd dist/cleepbus
-          zip -q -8 -r "../$ARCHIVE" .
+          zip -q -8 -r "../../package/$ARCHIVE" .
           echo "Package $ARCHIVE built successfully"
+          cd ../../package
+          ls -l
+      - persist_to_workspace:
+          root: package
+          paths:
+            - "$ARCHIVE"
   publish:
     docker:
       - image: cimg/base:stable
@@ -39,6 +46,8 @@ jobs:
       - checkout
       - attach_workspace:
           at: dist
+      - attach_workspace:
+          at: package
       - gh/setup
       - run: scripts/publish.sh
 
