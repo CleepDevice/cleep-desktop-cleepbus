@@ -11,7 +11,7 @@ checkResult() {
         if [[ -z "$1" ]]; then
             msg="see output log"
         fi
-        echo -e "${RED}Error occured: $msg.${NOCOLOR}"
+        echo -e "Error occured: $msg."
         exit 1
     fi
 }

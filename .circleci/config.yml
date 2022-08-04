@@ -10,7 +10,9 @@ jobs:
     resource_class: small
     steps:
       - checkout
-      - run: scripts/build-linux-circleci.sh
+      - run:
+          name: Building
+          command: scripts/build-linux-circleci.sh
       - persist_to_workspace:
           root: dist
           paths:
@@ -23,17 +25,9 @@ jobs:
     steps:
       - attach_workspace:
           at: dist
-      - run: find 
-      - run: |
-          VERSION=`cat dist/version.txt`
-          PLATFORM=`cat dist/platform.txt`
-          ARCHIVE="cleepbus-v$VERSION-$PLATFORM-x64.zip"
-          mkdir package
-          cd dist/cleepbus
-          zip -q -8 -r "../../package/$ARCHIVE" .
-          echo "Package $ARCHIVE built successfully"
-          cd ../../package
-          ls -l
+      - run:
+          name: Packaging
+          command: scripts/package.sh
       - persist_to_workspace:
           root: package
           paths:
@@ -48,13 +42,20 @@ jobs:
       - attach_workspace:
           at: package
       - gh/setup
-      - run: scripts/publish.sh
-
+      - run:
+          name: Publishing
+          command: scripts/publish.sh
   notify:
     docker:
       - image: cimg/base:stable
     resource_class: small
     steps:
+      - checkout
+      - run:
+          name: Slack notification
+          command: source scripts/notify.sh
+          environment:
+            VCS_TYPE: << pipeline.project.type >>
       - slack/notify:
           event: fail
           template: basic_fail_1
@@ -67,12 +68,23 @@ workflows:
   linux:
     jobs:
       - build-linux:
-          filters:
-            branches:
-              only: master
       - package:
           requires:
             - build-linux
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
       - publish:
           requires:
             - package
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
+      - notify:
+          context:
+            - circleci-api-admin
+            - slack
