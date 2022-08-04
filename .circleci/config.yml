@@ -15,8 +15,7 @@ jobs:
           root: dist
           paths:
             - cleepbus/*
-            - version.txt
-            - platform.txt
+            - ./*.txt
   package:
     docker:
       - image: cimg/base:stable
@@ -38,7 +37,7 @@ jobs:
       - persist_to_workspace:
           root: package
           paths:
-            - "$ARCHIVE"
+            - ./*.zip
   publish:
     docker:
       - image: cimg/base:stable
