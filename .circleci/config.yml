@@ -32,6 +32,19 @@ jobs:
           paths:
             - cleepbus/*
             - ./*.txt
+  build-macos:
+    macos:
+      xcode: 12.5.1
+    steps:
+      - checkout
+      - run:
+          name: Building
+          command: scripts/build-macos.sh
+      - persist_to_workspace:
+          root: dist
+          paths:
+            - cleepbus/*
+            - ./*.txt
   package:
     docker:
       - image: cimg/base:stable
@@ -104,6 +117,25 @@ workflows:
       - package:
           requires:
             - build-windows
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
+      - publish:
+          requires:
+            - package
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
+  macos:
+    jobs:
+      - build-macos
+      - package:
+          requires:
+            - build-macos
           filters:
             tags:
               only: /^v.*/

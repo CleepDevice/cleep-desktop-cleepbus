@@ -31,7 +31,7 @@ echo
 echo
 echo "Building application..."
 echo "-----------------------"
-cp scripts/linux.spec pyinstaller.spec
+cp scripts/macos.spec pyinstaller.spec
 python3 -m PyInstaller --clean --noconfirm --log-level INFO pyinstaller.spec
 checkResult $? 0 "Failed to build cleepbus application"
 rm pyinstaller.spec
@@ -43,7 +43,7 @@ echo "------------------"
 VERSION=`dist/cleepbus/cleepbus --version`
 echo $VERSION > dist/version.txt
 echo "Found version $VERSION"
-echo linux > dist/platform.txt
+echo macos > dist/platform.txt
 
 echo
 echo
