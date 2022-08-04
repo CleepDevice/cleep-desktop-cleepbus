@@ -2,10 +2,12 @@ version: 2.1
 orbs:
   win: circleci/windows@5.0.0
   slack: circleci/slack@4.10.1
+  gh: circleci/github-cli@2.0
 jobs:
   build-linux:
     docker:
-      - image: cimg/base:edge
+      - image: cimg/base:stable
+    resource_class: small
     steps:
       - checkout
       - run: scripts/build-linux-circleci.sh
@@ -17,11 +19,12 @@ jobs:
             - platform.txt
   package:
     docker:
-      - image: cimg/base:edge
+      - image: cimg/base:stable
+    resource_class: small
     steps:
       - attach_workspace:
           at: dist
-      - run: ls -l
+      - run: find 
       - run: |
           VERSION=`cat dist/version.txt`
           PLATFORM=`cat dist/platform.txt`
@@ -29,6 +32,15 @@ jobs:
           cd dist/cleepbus
           zip -q -8 -r "../$ARCHIVE" .
           echo "Package $ARCHIVE built successfully"
+  publish:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - attach_workspace:
+          at: dist
+      - gh/setup
+      - run: scripts/publish.sh
+
   notify:
     docker:
       - image: cimg/base:stable
