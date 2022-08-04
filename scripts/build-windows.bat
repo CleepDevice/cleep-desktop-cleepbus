@@ -34,7 +34,7 @@ echo.
 echo.
 echo Generated files
 echo ---------------
-dir dist\
+dir /s /b dist\
 
 cd ..\..
 
