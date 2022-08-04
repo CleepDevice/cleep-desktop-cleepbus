@@ -94,7 +94,7 @@ workflows:
   version: 2
   test:
     jobs:
-      - build-linux
+      - build-linux:
           filters:
             tags:
               only: /.*/
