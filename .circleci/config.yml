@@ -18,6 +18,20 @@ jobs:
           paths:
             - cleepbus/*
             - ./*.txt
+  build-windows:
+    executor:
+      name: win/default
+      shell: powershell.exe
+    steps:
+      - checkout
+      - run:
+          name: Building
+          command: scripts/build-windows.bat
+      - persist_to_workspace:
+          root: dist
+          paths:
+            - cleepbus/*
+            - ./*.txt
   package:
     docker:
       - image: cimg/base:stable
@@ -84,7 +98,22 @@ workflows:
               only: /^v.*/
             branches:
               ignore: /.*/
-      - notify:
-          context:
-            - circleci-api-admin
-            - slack
+  windows:
+    jobs:
+      - build-windows
+      - package:
+          requires:
+            - build-windows
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
+      - publish:
+          requires:
+            - package
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/

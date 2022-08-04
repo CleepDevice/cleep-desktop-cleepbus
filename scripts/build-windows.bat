@@ -23,9 +23,18 @@ del /q pyinstaller.spec
 
 echo.
 echo.
+echo Getting version
+echo ---------------
+dist\cleepbus\cleepbus.exe --version > dist\version.txt
+set /P VERSION=<version.txt
+echo Found version %VERSION%
+echo windows > dist\platform.txt
+
+echo.
+echo.
 echo Generated files
 echo ---------------
-dir dist\cleepbus
+dir dist\
 
 cd ..\..
 
