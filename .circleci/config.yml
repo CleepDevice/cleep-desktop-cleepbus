@@ -95,6 +95,11 @@ workflows:
   test:
     jobs:
       - build-linux
+          filters:
+            tags:
+              only: /.*/
+            branches:
+              only: master
   linux:
     jobs:
       - build-linux
