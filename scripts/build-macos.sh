@@ -49,5 +49,5 @@ echo
 echo
 echo "Generated files"
 echo "---------------"
-find
+find ./
 
