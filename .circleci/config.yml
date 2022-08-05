@@ -50,6 +50,7 @@ jobs:
       - image: cimg/base:stable
     resource_class: small
     steps:
+      - checkout
       - attach_workspace:
           at: dist
       - run:
