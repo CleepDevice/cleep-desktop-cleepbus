@@ -16,22 +16,22 @@ class CleepBus:
 
     UNCONFIGURED_DEVICE_HOSTNAME = "cleepdevice"
 
-    def __init__(self, message_queue, client_uuid=None):
+    def __init__(self, message_queue, config):
         """
         Args:
             message_queue (Queue): message queue instance
-            client_uuid (str): client uuid
+            config (dict): app configuration
         """
         self.logger = logging.getLogger(self.__class__.__name__)
         self.message_queue = message_queue
-        self.uuid = client_uuid or str(uuid.uuid4())
+        self.uuid = config.get("uuid") or str(uuid.uuid4())
 
         self.pyrebus = PyreBus(
             self.__on_message_received,
             self.__on_peer_connected,
             self.__on_peer_disconnected,
             self.__decode_peer_infos,
-            True,
+            config.get("debug", False),
             None,
         )
 
@@ -41,6 +41,13 @@ class CleepBus:
         """
         infos = self.get_cleepbus_headers()
         self.pyrebus.start(infos)
+
+    def stop(self):
+        """
+        Stop bus
+        """
+        if self.pyrebus:
+            self.pyrebus.stop()
 
     def read_messages(self):
         """
