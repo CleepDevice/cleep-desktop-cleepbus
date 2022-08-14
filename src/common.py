@@ -2,13 +2,40 @@ import copy
 from exception import InvalidMessage
 
 
+class InternalMessageContent:
+    """
+    Internal message content
+    """
+
+    CONTENT_TYPE_PEER_CONNECTED = "PEER_CONNECTED"
+    CONTENT_TYPE_PEER_DISCONNECTED = "PEER_DISCONNECTED"
+    CONTENT_TYPE_MESSAGE_RESPONSE = "MESSAGE_RESPONSE"
+
+    def __init__(self, content_type, data):
+        """
+        Constructor
+
+        Args:
+            content_type (string): content type (CONTENT_TYPE_XXX)
+            data (any): data depends on content type
+        """
+        self.content_type = content_type
+        self.data = data
+
+    def __str__(self):
+        return "InternalMessageContent: " + self.content_type + " " + str(self.data)
+
+    def to_dict(self):
+        return {"content_type": self.content_type, "data": self.data.to_dict()}
+
+
 class InternalMessage:
     """
     Handle internal message to process it according to type
     """
 
-    MESSAGE_TYPE_TOELECTRON = "toelectron"
-    MESSAGE_TYPE_FROMELECTRON = "fromelectron"
+    MESSAGE_TYPE_TOELECTRON = "TO_ELECTRON"
+    MESSAGE_TYPE_FROMELECTRON = "FROM_ELECTRON"
 
     def __init__(self, message_type, content):
         """
@@ -16,10 +43,13 @@ class InternalMessage:
 
         Args:
             message_type (str): message type (MESSAGE_TYPE_XXX)
-            content (any): message content
+            content (InternalMessageContent): message content
         """
         self.message_type = message_type
         self.content = content
+
+    def __str__(self):
+        return "InternalMessage: " + self.message_type + " " + str(self.content)
 
 
 class PeerInfos:

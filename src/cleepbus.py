@@ -5,7 +5,7 @@ import logging
 import platform
 import uuid
 from pyrebus import PyreBus
-from common import MessageRequest, PeerInfos, InternalMessage
+from common import InternalMessageContent, MessageRequest, PeerInfos, InternalMessage
 from version import VERSION
 
 
@@ -22,16 +22,20 @@ class CleepBus:
             message_queue (Queue): message queue instance
             config (dict): app configuration
         """
+        debug = config.get("debug", False)
         self.logger = logging.getLogger(self.__class__.__name__)
+        if debug:
+            self.logger.setLevel(logging.DEBUG)
         self.message_queue = message_queue
         self.uuid = config.get("uuid") or str(uuid.uuid4())
+        self.peers = {}
 
         self.pyrebus = PyreBus(
             self.__on_message_received,
             self.__on_peer_connected,
             self.__on_peer_disconnected,
             self.__decode_peer_infos,
-            config.get("debug", False),
+            debug,
             None,
         )
 
@@ -89,32 +93,34 @@ class CleepBus:
 
         return headers
 
-    def __on_message_received(self, peer_id, message):
+    def __on_message_received(self, peer_uuid, message):
         """
         Handle received message from external bus
 
         Args:
-            peer_id (string): peer identifier
-            message (MessageRequest): message from external bus
-
-        Returns:
-            MessageResponse if message is a command
+            peer_uuid (string): peer identifier
+            message (MessageResponse): message from external bus
         """
+        self.logger.debug("Message received from %s: %s", peer_uuid, message)
+        content = InternalMessageContent(
+            content_type=InternalMessageContent.CONTENT_TYPE_MESSAGE_RESPONSE,
+            data=message,
+        )
         msg = InternalMessage(
             message_type=InternalMessage.MESSAGE_TYPE_TOELECTRON,
-            content={peer_id: peer_id, message: message},
+            content=content,
         )
         self.message_queue.put(msg)
 
-    def __on_peer_connected(self, peer_id, peer_infos):
+    def __on_peer_connected(self, peer_uuid, peer_infos):
         """
         Device is connected
 
         Args:
-            peer_id (string): peer identifier
+            peer_uuid (string): peer identifier
             peer_infos (PeerInfos): peer informations (ip, port, ssl...)
         """
-        self.logger.debug("Peer connected with %s", peer_infos.to_dict())
+        self.logger.debug("Peer %s connected with %s", peer_uuid, peer_infos.to_dict())
 
         # drop other cleep-desktop connection
         if peer_infos.cleepdesktop:
@@ -130,16 +136,44 @@ class CleepBus:
             and peer_infos.hostname != self.UNCONFIGURED_DEVICE_HOSTNAME
         ):
             peer_infos.extra["configured"] = True
-        self.logger.debug("Peer %s connected: %s", peer_id, peer_infos)
+        self.peers[peer_uuid] = peer_infos
+        self.logger.debug("Peer %s connected: %s", peer_uuid, peer_infos)
 
-    def __on_peer_disconnected(self, peer_id):
+        # queue message
+        content = InternalMessageContent(
+            content_type=InternalMessageContent.CONTENT_TYPE_PEER_CONNECTED,
+            data=peer_infos,
+        )
+        msg = InternalMessage(
+            message_type=InternalMessage.MESSAGE_TYPE_TOELECTRON,
+            content=content,
+        )
+        self.message_queue.put(msg)
+
+    def __on_peer_disconnected(self, peer_uuid):
         """
         Device is disconnected
 
         Args:
-            peer_id (str): peer identifier
+            peer_uuid (str): peer identifier
         """
-        self.logger.debug("Peer %s disconnected", peer_id)
+        self.logger.debug("Peer %s disconnected", peer_uuid)
+
+        # update peer
+        peer = self.peers.get(peer_uuid, None)
+        if peer:
+            peer["online"] = False
+
+        # queue message
+        content = InternalMessageContent(
+            content_type=InternalMessageContent.CONTENT_TYPE_PEER_DISCONNECTED,
+            data=peer,
+        )
+        msg = InternalMessage(
+            message_type=InternalMessage.MESSAGE_TYPE_TOELECTRON,
+            content=content,
+        )
+        self.message_queue.put(msg)
 
     def __decode_peer_infos(self, infos):
         """

@@ -1,6 +1,7 @@
 import logging
 import websocket
 import time
+import json
 from common import InternalMessage
 
 
@@ -16,6 +17,8 @@ class Electron:
             config (dict): app configuration
         """
         self.logger = logging.getLogger(self.__class__.__name__)
+        if config.get("debug", False):
+            self.logger.setLevel(logging.DEBUG)
         self.message_queue = message_queue
         self.websocket = None
         self.config = config
@@ -59,6 +62,7 @@ class Electron:
         """
         if not self.websocket:
             self.__connectToWebsocket()
+            return
 
         try:
             message = self.websocket.recv()
@@ -87,7 +91,10 @@ class Electron:
             return
 
         try:
-            self.logger.debug("Send message to electron %s", message)
-            self.websocket.send(message.content)
+            self.logger.debug("Send message to electron: %s", message.to_dict())
+            self.websocket.send(json.dumps(message.to_dict()))
         except websocket.WebSocketTimeoutException:
             pass
+        except websocket.WebSocketConnectionClosedException:
+            self.logger.warning("Websocket disconnected")
+            self.websocket = None

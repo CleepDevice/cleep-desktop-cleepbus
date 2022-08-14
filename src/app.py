@@ -11,7 +11,7 @@ logging.basicConfig(level=logging.INFO, stream=sys.stdout)
 
 
 def send_message_to_bus(message):
-    logger.info("Message to send to bus: %r", message)
+    logger.info("Message received from electron: %r", message)
 
 
 def process_queue():
