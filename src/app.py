@@ -76,9 +76,10 @@ try:
     while True:
         electron.read_message()
         cleepbus.read_messages()
-        running = process_queue()
-        if not running:
-            break
+        if electron.is_connected():
+            running = process_queue()
+            if not running:
+                break
 
 except Exception:
     logger.exception("App failed")

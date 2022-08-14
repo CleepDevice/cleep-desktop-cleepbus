@@ -37,6 +37,14 @@ class Electron:
             self.logger.info("Disconnected from cleep-desktop")
             self.websocket.close()
 
+    def is_connected(self):
+        """
+        Return websocket connection state
+        Returns:
+            bool: True if connected to electron
+        """
+        return bool(self.websocket)
+
     def __connectToWebsocket(self):
         """
         Connect to Electron websocket
