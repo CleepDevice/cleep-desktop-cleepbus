@@ -68,6 +68,9 @@ class Electron:
         """
         Read message from websocket and put it in message queue
         """
+        if not self.config.get("websocket", False):
+            return
+
         if not self.websocket:
             self.__connectToWebsocket()
             return
@@ -94,6 +97,9 @@ class Electron:
         Args:
             message (InternalMessage): message to send
         """
+        if not self.config.get("websocket", False):
+            return
+
         if not self.websocket:
             # do not try to connect to websocket here, read_message does it regularly
             return
