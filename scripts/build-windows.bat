@@ -27,7 +27,7 @@ echo Getting version
 echo ---------------
 dist\cleepbus\cleepbus.exe --version > dist\version.txt
 set /P VERSION=<dist\version.txt
-echo Found version %VERSION%
+echo Found version "%VERSION%"
 echo windows > dist\platform.txt
 
 echo.

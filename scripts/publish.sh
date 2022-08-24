@@ -25,8 +25,9 @@ echo
 echo
 echo "Getting version..."
 echo "------------------"
-VERSION=`cat dist/version.txt | xargs`
-echo "Found version $VERSION"
+sed 's/\r$//' dist/version.txt > version.txt
+VERSION=`cat version.txt | xargs`
+echo "Found version \"$VERSION\""
 
 echo
 echo
