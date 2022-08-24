@@ -40,11 +40,25 @@ def show_version():
     print(VERSION)
 
 
+def show_usage():
+    print(
+        "Usage: ./cleepbus [-n|--no-ws] [-u|--uuid] [-p|--ws-port] [-d|--debug] [-v|--version] [-h|--help]"
+    )
+    print("options:")
+    print(" -n|--no-ws:   disable websocket feature")
+    print(" -u|--uuid:    specify Cleep network uuid")
+    print(" -p|--ws-port: websocket port (if not disabled)")
+    print(" -v|--version: show cleepbus version")
+    print(" -h|--help:    this help")
+
+
 # command line arguments
 CONFIG = {"websocket": True, "uuid": None, "debug": False}
 try:
     opts, args = getopt.getopt(
-        sys.argv[1:], "nu:vdp:", ["debug", "no-ws", "uuid=", "version", "ws-port="]
+        sys.argv[1:],
+        "nu:vdp:h",
+        ["debug", "no-ws", "uuid=", "version", "ws-port=", "help"],
     )
 except Exception:
     logging.exception("Invalid command arguments")
@@ -63,6 +77,9 @@ for opt, arg in opts:
     if opt in ("-v", "--version"):
         show_version()
         sys.exit(0)
+    if opt in ("-h", "--help"):
+        show_usage()
+        sys.exit(1)
 
 logger = logging.getLogger("App")
 logger.debug("Config: %s", CONFIG)
