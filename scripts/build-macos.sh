@@ -34,7 +34,7 @@ echo "-----------------------"
 cp scripts/macos.spec pyinstaller.spec
 cp scripts/entitlements.plist entitlements.plist
 cp scripts/icon.icns icon.icns
-python3 -m PyInstaller --onefile --clean --noconfirm --log-level DEBUG pyinstaller.spec
+python3 -m PyInstaller --clean --noconfirm --log-level DEBUG pyinstaller.spec
 checkResult $? 0 "Failed to build cleepbus application"
 which codesign
 rm pyinstaller.spec
