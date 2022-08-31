@@ -32,9 +32,9 @@ echo
 echo "Building application..."
 echo "-----------------------"
 cp scripts/macos.spec pyinstaller.spec
-cp scripts/Info.plist Info.plist
 cp scripts/entitlements.plist entitlements.plist
-python3 -m PyInstaller --target-architecture universal2 --osx-entitlements-file entitlements.plist --codesign-identity tanguy.bonneau@gmail.com --clean --noconfirm --log-level DEBUG pyinstaller.spec
+cp scripts/icon.icns icon.icns
+python3 -m PyInstaller --clean --noconfirm --log-level DEBUG pyinstaller.spec
 checkResult $? 0 "Failed to build cleepbus application"
 which codesign
 rm pyinstaller.spec

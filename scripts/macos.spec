@@ -19,7 +19,25 @@ a = Analysis(['src/app.py'],
              excludes=[],
              win_no_prefer_redirects=False,
              win_private_assemblies=False,
-             cipher=block_cipher)
+             cipher=block_cipher,
+             bundle_identifier=None,
+             info_plist={
+               'NSPrincipalClass': 'NSApplication',
+               'NSAppleScriptEnabled': False,
+               'CFBundleIdentifier': 'com.cleep.cleepdesktopcleepbus',
+               'CFBundleInfoDictionaryVersion': '6.0',
+               'CFBundleName': 'CleepDesktopCleepbus',
+               'CFBundlePackageType': 'APPL',
+               'CFBundleDocumentTypes': [
+                  {
+                     'CFBundleTypeName': 'CleepDesktopCleepbus',
+                     'CFBundleTypeRole': 'Shell',
+                     'CFBundleTypeIconFile': 'icon.icns',
+                     'LSItemContentTypes': ['com.example.myformat'],
+                     'LSHandlerRank': 'Owner'
+                  }
+               ]
+             })
 pyz = PYZ(a.pure, a.zipped_data,
              cipher=block_cipher)
 exe = EXE(pyz,
