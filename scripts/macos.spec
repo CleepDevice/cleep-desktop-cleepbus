@@ -20,7 +20,6 @@ a = Analysis(['src/app.py'],
              win_no_prefer_redirects=False,
              win_private_assemblies=False,
              cipher=block_cipher,
-             bundle_identifier=None,
              info_plist={
                'NSPrincipalClass': 'NSApplication',
                'NSAppleScriptEnabled': False,
