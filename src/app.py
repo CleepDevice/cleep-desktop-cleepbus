@@ -85,11 +85,13 @@ logger = logging.getLogger("App")
 logger.debug("Config: %s", CONFIG)
 
 logger.info("========== cleep-desktop-cleepbus v%s started ==========", VERSION)
-shared_queue = Queue(maxsize=100)
-cleepbus = CleepBus(shared_queue, CONFIG)
-cleepbus.start()
-electron = Electron(shared_queue, CONFIG)
+exit_code = 0
 try:
+    shared_queue = Queue(maxsize=100)
+    cleepbus = CleepBus(shared_queue, CONFIG)
+    cleepbus.start()
+    electron = Electron(shared_queue, CONFIG)
+
     while True:
         electron.read_message()
         cleepbus.read_messages()
@@ -100,6 +102,7 @@ try:
 
 except Exception:
     logger.exception("App failed")
+    exit_code = 1
 except KeyboardInterrupt:
     pass
 
@@ -110,3 +113,4 @@ except Exception:
     pass
 
 logger.info("cleep-desktop-cleepbus stopped")
+sys.exit(exit_code)
