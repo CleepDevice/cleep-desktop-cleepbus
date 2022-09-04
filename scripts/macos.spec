@@ -1,6 +1,7 @@
 # -*- mode: python -*-
 
 from PyInstaller.utils.hooks import collect_submodules
+from src.version import VERSION
 
 block_cipher = None
 sentry_sdk_submodules = collect_submodules('sentry_sdk')
@@ -19,26 +20,11 @@ a = Analysis(['src/app.py'],
              excludes=[],
              win_no_prefer_redirects=False,
              win_private_assemblies=False,
-             cipher=block_cipher,
-             info_plist={
-               'NSPrincipalClass': 'NSApplication',
-               'NSAppleScriptEnabled': False,
-               'CFBundleIdentifier': 'com.cleep.cleepdesktopcleepbus',
-               'CFBundleInfoDictionaryVersion': '6.0',
-               'CFBundleName': 'CleepDesktopCleepbus',
-               'CFBundlePackageType': 'APPL',
-               'CFBundleDocumentTypes': [
-                  {
-                     'CFBundleTypeName': 'CleepDesktopCleepbus',
-                     'CFBundleTypeRole': 'Shell',
-                     'CFBundleTypeIconFile': 'icon.icns',
-                     'LSItemContentTypes': ['com.example.myformat'],
-                     'LSHandlerRank': 'Owner'
-                  }
-               ]
-             })
+             cipher=block_cipher)
+
 pyz = PYZ(a.pure, a.zipped_data,
              cipher=block_cipher)
+
 exe = EXE(pyz,
           a.scripts,
           exclude_binaries=True,
@@ -46,7 +32,8 @@ exe = EXE(pyz,
           debug=False,
           strip=False,
           upx=False,
-          console=True )
+          console=True)
+
 coll = COLLECT(exe,
                a.binaries,
                a.zipfiles,
@@ -54,3 +41,17 @@ coll = COLLECT(exe,
                strip=False,
                upx=False,
                name='cleepbus')
+
+app = BUNDLE(coll,
+             name='cleepbus',
+             icon='icon.icns',
+             bundle_identifier=None
+             version=VERSION,
+             info_plist={
+               'NSPrincipalClass': 'NSApplication',
+               'NSAppleScriptEnabled': False,
+               'CFBundleIdentifier': 'com.cleep.cleepdesktopcleepbus',
+               'CFBundleInfoDictionaryVersion': '6.0',
+               'CFBundleName': 'CleepDesktopCleepbus',
+               'CFBundlePackageType': 'APPL',
+             })
