@@ -45,7 +45,7 @@ coll = COLLECT(exe,
 app = BUNDLE(coll,
              name='cleepbus',
              icon='icon.icns',
-             bundle_identifier=None
+             bundle_identifier=None,
              version=VERSION,
              info_plist={
                'NSPrincipalClass': 'NSApplication',
