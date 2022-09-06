@@ -35,8 +35,7 @@ exe = EXE(pyz,
           console=True,
           icon='icon.icns',
           target_arch='x86_64',
-          entitlements_file='entitlements.plist',
-          codesign_identity='com.cleep.cleepdesktop')
+          entitlements_file='entitlements.plist')
 
 coll = COLLECT(exe,
                a.binaries,
