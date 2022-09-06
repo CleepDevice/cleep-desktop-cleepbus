@@ -7,11 +7,11 @@
     <key>CFBundleDevelopmentRegion</key>
     <string>France</string>
     <key>CFBundleExecutable</key>
-    <string>CleepDesktop</string>
+    <string>Cleepbus</string>
     <key>CFBundleIconFile</key>
-    <string>resources/icon.icns</string>
+    <string>icon.icns</string>
     <key>CFBundleIdentifier</key>
-    <string>com.cleep.cleepdesktop</string>
+    <string>com.cleep.cleepbus</string>
     <key>CFBundleInfoDictionaryVersion</key>
     <string>6.0</string>
     <key>CFBundleName</key>

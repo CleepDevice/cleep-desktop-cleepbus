@@ -32,7 +32,11 @@ exe = EXE(pyz,
           debug=False,
           strip=False,
           upx=False,
-          console=True)
+          console=True,
+          icon='icon.icns',
+          target_arch='x86_64',
+          entitlements_file='entitlements.plist',
+          codesign_identity='com.cleep.cleepbus')
 
 coll = COLLECT(exe,
                a.binaries,
@@ -41,17 +45,3 @@ coll = COLLECT(exe,
                strip=False,
                upx=False,
                name='cleepbus')
-
-app = BUNDLE(coll,
-             name='cleepbus',
-             icon='icon.icns',
-             bundle_identifier=None,
-             version=VERSION,
-             info_plist={
-               'NSPrincipalClass': 'NSApplication',
-               'NSAppleScriptEnabled': False,
-               'CFBundleIdentifier': 'com.cleep.cleepdesktopcleepbus',
-               'CFBundleInfoDictionaryVersion': '6.0',
-               'CFBundleName': 'CleepDesktopCleepbus',
-               'CFBundlePackageType': 'APPL',
-             })
