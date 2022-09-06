@@ -44,6 +44,7 @@ echo
 echo "Getting version..."
 echo "------------------"
 VERSION=`dist/cleepbus/cleepbus --version`
+checkResult $? 0 "Failed to get cleepbus version"
 echo $VERSION > dist/version.txt
 echo "Found version $VERSION"
 echo macos > dist/platform.txt
