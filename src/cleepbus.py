@@ -120,7 +120,7 @@ class CleepBus:
             peer_uuid (string): peer identifier
             peer_infos (PeerInfos): peer informations (ip, port, ssl...)
         """
-        self.logger.debug("Peer %s connected with %s", peer_uuid, peer_infos.to_dict())
+        self.logger.info("Peer %s connected with %s", peer_uuid, peer_infos.to_dict())
 
         # drop other cleep-desktop connection
         if peer_infos.cleepdesktop:
@@ -157,7 +157,7 @@ class CleepBus:
         Args:
             peer_uuid (str): peer identifier
         """
-        self.logger.debug("Peer %s disconnected", peer_uuid)
+        self.logger.info("Peer %s disconnected", peer_uuid)
 
         # update peer
         peer = self.peers.get(peer_uuid, None)
