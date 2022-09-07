@@ -22,6 +22,10 @@ class Electron:
         self.message_queue = message_queue
         self.websocket = None
         self.config = config
+        if not self.config.get("websocketport", None) or not self.config.get(
+            "websocket", False
+        ):
+            self.logger.info("Websocket disabled")
 
     def __del__(self):
         """
@@ -55,9 +59,6 @@ class Electron:
                 self.websocket = websocket.WebSocket()
                 self.websocket.connect(f"ws://127.0.0.1:{websocketPort}", timeout=0.25)
                 self.logger.info("Connected to cleep-desktop websocket")
-                # TODO self.websocket.send("pouet")
-            else:
-                self.logger.info("Websocket disabled")
         except ConnectionRefusedError:
             self.logger.info(
                 "Websocket server is not available. Retrying in few seconds"
