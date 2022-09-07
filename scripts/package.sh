@@ -30,11 +30,10 @@ cd dist/cleepbus
 zip -q -8 -r "../../package/$ARCHIVE" .
 checkResult $? 0 "Failed to package application"
 echo "Package $ARCHIVE built successfully"
+cd ../..
 
 echo
 echo
 echo "Generated files"
 echo "---------------"
-cd ../../package
-ls -l
-
+ls -l package/

@@ -45,5 +45,5 @@ echo
 echo
 echo "Uploading files..."
 echo "------------------"
-gh release upload "$TAG" dist/*.zip --repo "$REPO"
+gh release upload "$TAG" package/*.zip --repo "$REPO"
 
