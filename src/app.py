@@ -6,8 +6,14 @@ from electron import Electron
 from common import InternalMessage
 from version import VERSION
 from cleepbus import CleepBus
+import sentry_sdk
+from platform import platform
 
 logging.basicConfig(level=logging.INFO, stream=sys.stdout)
+
+SENTRY_DSN = "https://47efccd983f44af9b37dd98c8d643ece@o97410.ingest.sentry.io/6704013"
+sentry_sdk.init(dsn=SENTRY_DSN, release=f"cleepbus@{VERSION}")
+sentry_sdk.set_tag("platform", platform())
 
 
 def send_message_to_bus(message):
@@ -100,8 +106,10 @@ try:
             if not running:
                 break
 
-except Exception:
+except Exception as error:
     logger.exception("App failed")
+    if not CONFIG["debug"]:
+        sentry_sdk.capture_exception(error)
     exit_code = 1
 except KeyboardInterrupt:
     pass
