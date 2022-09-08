@@ -11,22 +11,32 @@ class InternalMessageContent:
     CONTENT_TYPE_PEER_DISCONNECTED = "PEER_DISCONNECTED"
     CONTENT_TYPE_MESSAGE_RESPONSE = "MESSAGE_RESPONSE"
 
-    def __init__(self, content_type, data):
+    def __init__(self, content_type, peer_infos, data=None):
         """
         Constructor
 
         Args:
             content_type (string): content type (CONTENT_TYPE_XXX)
+            peer_infos (PeerInfos): peer informations
             data (any): data depends on content type
         """
         self.content_type = content_type
+        self.peer_infos = peer_infos
         self.data = data
 
     def __str__(self):
-        return "InternalMessageContent: " + self.content_type + " " + str(self.data)
+        string = f"InternalMessageContent: ${self.content_type} - ${self.peer_infos} - ${self.data}"
+        return string
 
     def to_dict(self):
-        return {"content_type": self.content_type, "data": self.data.to_dict()}
+        output = {
+            "content_type": self.content_type,
+            "peer_infos": self.peer_infos.to_dict(),
+        }
+        if self.data:
+            output["data"] = self.data.to_dict()
+
+        return output
 
 
 class InternalMessage:

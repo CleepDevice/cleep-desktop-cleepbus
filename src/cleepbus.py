@@ -104,6 +104,7 @@ class CleepBus:
         self.logger.debug("Message received from %s: %s", peer_uuid, message)
         content = InternalMessageContent(
             content_type=InternalMessageContent.CONTENT_TYPE_MESSAGE_RESPONSE,
+            peer_infos=self.peers[peer_uuid],
             data=message,
         )
         msg = InternalMessage(
@@ -142,7 +143,7 @@ class CleepBus:
         # queue message
         content = InternalMessageContent(
             content_type=InternalMessageContent.CONTENT_TYPE_PEER_CONNECTED,
-            data=peer_infos,
+            peer_infos=peer_infos,
         )
         msg = InternalMessage(
             message_type=InternalMessage.MESSAGE_TYPE_TOELECTRON,
@@ -160,14 +161,14 @@ class CleepBus:
         self.logger.info("Peer %s disconnected", peer_uuid)
 
         # update peer
-        peer = self.peers.get(peer_uuid, None)
-        if peer:
-            peer["online"] = False
+        peer_infos = self.peers.get(peer_uuid, None)
+        if peer_infos:
+            peer_infos["online"] = False
 
         # queue message
         content = InternalMessageContent(
             content_type=InternalMessageContent.CONTENT_TYPE_PEER_DISCONNECTED,
-            data=peer,
+            peer_infos=peer_infos,
         )
         msg = InternalMessage(
             message_type=InternalMessage.MESSAGE_TYPE_TOELECTRON,
