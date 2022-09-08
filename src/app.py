@@ -7,13 +7,11 @@ from common import InternalMessage
 from version import VERSION
 from cleepbus import CleepBus
 import sentry_sdk
-from platform import platform
+from platform import platform, processor
 
 logging.basicConfig(level=logging.INFO, stream=sys.stdout)
 
 SENTRY_DSN = "https://47efccd983f44af9b37dd98c8d643ece@o97410.ingest.sentry.io/6704013"
-sentry_sdk.init(dsn=SENTRY_DSN, release=f"cleepbus@{VERSION}")
-sentry_sdk.set_tag("platform", platform())
 
 
 def send_message_to_bus(message):
@@ -89,6 +87,14 @@ for opt, arg in opts:
 
 logger = logging.getLogger("App")
 logger.debug("Config: %s", CONFIG)
+
+if not CONFIG["debug", False]:
+    sentry_sdk.init(dsn=SENTRY_DSN, release=f"cleepbus@{VERSION}")
+    sentry_sdk.set_tag("platform", platform())
+    sentry_sdk.set_tag("processor", processor())
+    logger.info("Crash report enabled")
+else:
+    logger.info("Crash report disabled")
 
 logger.info("========== cleep-desktop-cleepbus v%s started ==========", VERSION)
 exit_code = 0
