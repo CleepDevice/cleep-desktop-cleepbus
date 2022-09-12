@@ -88,7 +88,7 @@ for opt, arg in opts:
 logger = logging.getLogger("App")
 logger.debug("Config: %s", CONFIG)
 
-if not CONFIG["debug", False]:
+if not CONFIG.get("debug", False):
     sentry_sdk.init(dsn=SENTRY_DSN, release=f"cleepbus@{VERSION}")
     sentry_sdk.set_tag("platform", platform())
     sentry_sdk.set_tag("processor", processor())
@@ -114,7 +114,7 @@ try:
 
 except Exception as error:
     logger.exception("App failed")
-    if not CONFIG["debug"]:
+    if not CONFIG.get("debug", False):
         sentry_sdk.capture_exception(error)
     exit_code = 1
 except KeyboardInterrupt:
