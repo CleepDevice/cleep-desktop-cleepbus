@@ -105,6 +105,10 @@ class Electron:
             # do not try to connect to websocket here, read_message does it regularly
             return
 
+        if not message:
+            self.logger.info("Trying to send empty message")
+            return
+
         try:
             self.logger.debug("Send message to electron: %s", message.to_dict())
             self.websocket.send(json.dumps(message.to_dict()))
