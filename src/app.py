@@ -110,10 +110,11 @@ try:
         if electron.is_connected():
             running = process_queue()
             if not running:
+                logger.info("Received quit command from electron")
                 break
 
 except Exception as error:
-    logger.exception("App failed")
+    logger.exception("Main exception")
     if not CONFIG.get("debug", False):
         sentry_sdk.capture_exception(error)
     exit_code = 1
