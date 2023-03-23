@@ -75,6 +75,7 @@ class PeerInfos:
         ip=None,
         port=80,
         ssl=False,
+        auth=False,
         macs=None,
         cleepdesktop=False,
         extra=None,
@@ -89,6 +90,7 @@ class PeerInfos:
             ip (string): peer ip
             port (int): peer access port
             ssl (bool): peer has ssl enabled
+            auth (bool): peer has auth enabled
             macs (list): list of macs addresses
             cleepdesktop (bool): is cleepdesktop peer
             extra (dict): extra peer informations (about hardware...)
@@ -109,6 +111,7 @@ class PeerInfos:
         self.ip = ip
         self.port = port
         self.ssl = ssl
+        self.auth = auth
         self.macs = macs
         self.cleepdesktop = cleepdesktop
         self.online = False
@@ -131,6 +134,7 @@ class PeerInfos:
             "ip": self.ip,
             "port": self.port,
             "ssl": self.ssl,
+            "auth": self.auth,
             "macs": self.macs,
             "cleepdesktop": self.cleepdesktop,
             "online": self.online,
@@ -148,7 +152,7 @@ class PeerInfos:
             string: peer infos as string
         """
         return (
-            "PeerInfos(uuid:%s, ident:%s, hostname:%s, ip:%s port:%s, ssl:%s, macs:%s, cleepdesktop:%s, online:%s, extra:%s)"
+            "PeerInfos(uuid:%s, ident:%s, hostname:%s, ip:%s port:%s, ssl:%s, auth:%s, macs:%s, cleepdesktop:%s, online:%s, extra:%s)"
             % (
                 self.uuid,
                 self.ident,
@@ -156,6 +160,7 @@ class PeerInfos:
                 self.ip,
                 self.port,
                 self.ssl,
+                self.auth,
                 self.macs,
                 self.cleepdesktop,
                 self.online,
@@ -178,6 +183,7 @@ class PeerInfos:
         self.ip = peer_infos.get("ip", None)
         self.port = peer_infos.get("port", None)
         self.ssl = peer_infos.get("ssl", False)
+        self.auth = peer_infos.get("auth", False)
         self.macs = peer_infos.get("macs", None)
         self.cleepdesktop = peer_infos.get("cleepdesktop", False)
         self.extra = copy.deepcopy(peer_infos.get("extra", {}))

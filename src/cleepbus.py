@@ -78,7 +78,6 @@ class CleepBus:
             dict: dict of headers (only string supported)
         """
         macs = self.pyrebus.get_mac_addresses()
-        # TODO handle port and ssl when security implemented
         headers = {
             "uuid": self.uuid,
             "version": VERSION,
@@ -86,6 +85,7 @@ class CleepBus:
             "port": "80",
             "macs": json.dumps(macs),
             "ssl": "0",
+            "auth": "0",
             "cleepdesktop": "1",
             "apps": json.dumps({}),
         }
@@ -195,6 +195,7 @@ class CleepBus:
         peer_infos.hostname = infos.get("hostname", None)
         peer_infos.port = int(infos.get("port", peer_infos.port))
         peer_infos.ssl = bool(strtobool(infos.get("ssl", f"{peer_infos.ssl}")))
+        peer_infos.auth = bool(strtobool(infos.get("auth", f"{peer_infos.auth}")))
         peer_infos.cleepdesktop = bool(
             strtobool(infos.get("cleepdesktop", f"{peer_infos.cleepdesktop}"))
         )
