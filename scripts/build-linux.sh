@@ -19,11 +19,28 @@ checkResult() {
 # clear previous process
 rm -rf dist/
 rm -rf build/
+rm -rf venv/
+
+echo
+echo
+echo "Preparing venv..."
+echo "-----------------"
+python3 -m venv venv
+source venv/bin/activate
 
 echo
 echo
 echo "Installing dependencies..."
 echo "--------------------------"
+python3 -m pip install cython
+# workaround for pyzmq install isue with python3.11 and missing longintrepr.h
+# -- start
+python3 -m pip download pyzmq
+tar -xzf pyzmq*
+cd pyzmq*
+python setup.py clean --all
+python setup.py cython
+# -- end
 python3 -m pip install -r requirements.txt
 checkResult $? 0 "Failed to install python dependencies"
 
@@ -52,3 +69,4 @@ echo "Generated files"
 echo "---------------"
 find
 
+deactivate

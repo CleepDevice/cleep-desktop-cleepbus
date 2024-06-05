@@ -35,6 +35,7 @@ jobs:
   build-macos:
     macos:
       xcode: 12.5.1
+    resource_class: macos.x86.medium.gen2
     steps:
       - checkout
       - run:

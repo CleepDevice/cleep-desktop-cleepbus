@@ -27,6 +27,7 @@ echo
 echo "Packaging application..."
 echo "------------------------"
 cd dist/cleepbus
+ls -lah
 zip -q -8 -r "../../package/$ARCHIVE" .
 checkResult $? 0 "Failed to package application"
 echo "Package $ARCHIVE built successfully"

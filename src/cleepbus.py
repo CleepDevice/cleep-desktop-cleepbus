@@ -161,9 +161,9 @@ class CleepBus:
         self.logger.info("Peer %s disconnected", peer_uuid)
 
         # update peer
-        peer_infos = self.peers.get(peer_uuid, None)
+        peer_infos = self.peers.get(peer_uuid)
         if peer_infos:
-            peer_infos["online"] = False
+            peer_infos.online = False
 
         # queue message
         content = InternalMessageContent(

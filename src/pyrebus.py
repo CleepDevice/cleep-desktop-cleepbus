@@ -60,10 +60,20 @@ class PyreBus(ExternalBus):
 
         # bus logger
         pyre_logger = logging.getLogger("pyre")
+        pyre_zbeacon_logger = logging.getLogger("pyre_gevent.zbeacon")
+        pyre_node_logger = logging.getLogger("pyre_gevent.pyre_node")
+        pyre_peer_logger = logging.getLogger("pyre_gevent.pyre_peer")
         if debug_enabled:
             pyre_logger.setLevel(logging.DEBUG)
+            pyre_zbeacon_logger.setLevel(logging.DEBUG)
+            pyre_node_logger.setLevel(logging.DEBUG)
+            pyre_peer_logger.setLevel(logging.DEBUG)
         else:
             pyre_logger.setLevel(logging.WARN)
+            pyre_zbeacon_logger.setLevel(logging.WARN)
+            pyre_node_logger.setLevel(logging.WARN)
+            pyre_peer_logger.setLevel(logging.DEBUG)
+
         pyre_logger.addHandler(logging.StreamHandler())
         pyre_logger.propagate = False
 
@@ -79,22 +89,6 @@ class PyreBus(ExternalBus):
         self.__bus_name = None
         self.__bus_channel = None
         self.endpoint = None
-
-    @staticmethod
-    def get_network_interfaces_names():
-        """
-        Return network interfaces names
-
-        Returns:
-            list: list of network interface names
-        """
-        out = []
-        netinf = zhelper_get_ifaddrs()
-        for iface in netinf:
-            for name, _ in iface.items():
-                out.append(name)
-
-        return out
 
     def get_mac_addresses(self):
         """
@@ -113,16 +107,18 @@ class PyreBus(ExternalBus):
                 self.logger.debug('Checking out interface "%s": %s', name, data)
                 data_2 = data.get(netifaces.AF_INET, None)
                 data_10 = data.get(netifaces.AF_INET6, None)
-                data_17 = data.get(netifaces.AF_LINK, None)
+                data_17 = data.get(netifaces.AF_PACKET, None)
                 # workaround: fallback to netifaces module to find mac addr
                 if not data_17 and data_2:
-                    data_17 = self.get_mac_addresses_from_netifaces(data_2)
+                    data_17 = PyreBus.get_mac_addresses_from_netifaces(data_2)
 
                 if not data_2 and not data_10:
                     self.logger.debug('AF_INET(6) not found for interface "%s".', name)
                     continue
                 if not data_17:
-                    self.logger.debug('AF_LINK not found for interface "%s".', name)
+                    self.logger.debug(
+                        'AF_PACKET(17) not found for interface "%s".', name
+                    )
                     continue
 
                 address_str = (data_2 and data_2.get("addr", None)) or (
@@ -166,7 +162,19 @@ class PyreBus(ExternalBus):
 
                 # keep only private interface (not exposed to internet)
                 ip_address = netaddr.IPAddress(address_str)
-                if ip_address and not ip_address.is_private():
+                if not ip_address:
+                    continue
+                # handle netaddr breaking changes
+                if netaddr.__version__.startswith("0."):
+                    # is_private does not exist anymore on new IpAddress lib version
+                    # pylint: disable=no-member
+                    ip_is_private = ip_address.is_private()
+                else:
+                    ip_is_private = (
+                        ip_address.is_ipv4_private_use()
+                        or ip_address.is_ipv6_unique_local()
+                    )
+                if not ip_is_private:
                     self.logger.debug(
                         'Interface "%s" refers to public ip address, drop it.', name
                     )
@@ -197,7 +205,7 @@ class PyreBus(ExternalBus):
             return None
 
         addresses = netifaces.ifaddresses(adapter)
-        mac_addr = addresses.get(-1000, None)  # mac addr field under windows :S
+        mac_addr = addresses.get(netifaces.AF_LINK, None)
 
         return (
             mac_addr[0]
@@ -336,11 +344,11 @@ class PyreBus(ExternalBus):
         items = {}
         try:
             items = dict(self.poller.poll(self.POLL_TIMEOUT))
-        except KeyboardInterrupt as exception:
+        except KeyboardInterrupt:
             # stop requested by user
             self.logger.debug("Stop Pyre bus")
             self.node.stop()
-            raise exception
+            return False
         except Exception:
             self.logger.exception("Exception occured during externalbus polling:")
 
@@ -399,7 +407,7 @@ class PyreBus(ExternalBus):
                 self.logger.debug("Message request received: %s", str(message))
                 self.on_message_received(str(data_peer), message)
             except Exception:
-                self.logger.exception("Error parsing peer message")
+                self.logger.exception("Error parsing peer message:")
 
         elif data_type == "ENTER":
             # get message data
@@ -475,7 +483,7 @@ class PyreBus(ExternalBus):
         message = MessageRequest()
         message.fill_from_dict(raw_message)
         self.logger.debug("Send message: %s", message)
-        cleaned_message = self.clean_message(message)
+        cleaned_message = PyreBus.clean_message(message)
         if message.peer_infos and message.peer_infos.ident:
             # whisper message (to peer)
             self.logger.debug("Whisper message: %s", cleaned_message)
@@ -539,7 +547,8 @@ class PyreBus(ExternalBus):
         # check bus
         if not self.__externalbus_configured:
             self.logger.warning(
-                "External bus is not configured yet, maybe no netword connection, message not sent"
+                "External bus is not configured yet, maybe no network connection, message not sent: %s",
+                message.to_dict(),
             )
             return
 
