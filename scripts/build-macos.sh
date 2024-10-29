@@ -24,7 +24,7 @@ echo
 echo
 echo
 echo "Installing tooling..."
-curl –proto '=https' –tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+curl -proto '=https' -tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 export PATH="$HOME/.cargo/bin:$PATH"
 
 echo

@@ -34,7 +34,7 @@ exe = EXE(pyz,
           upx=False,
           console=True,
           icon='icon.icns',
-          target_arch='x86_64',
+          target_arch='arm64',
           entitlements_file='entitlements.plist')
 
 coll = COLLECT(exe,
