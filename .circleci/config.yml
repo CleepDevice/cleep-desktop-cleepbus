@@ -34,7 +34,7 @@ jobs:
             - ./*.txt
   build-macos:
     macos:
-      xcode: 12.5.1
+      xcode: 16.0.0
     resource_class: macos.m1.medium.gen1
     steps:
       - checkout
