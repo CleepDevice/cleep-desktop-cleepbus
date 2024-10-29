@@ -22,14 +22,12 @@ rm -rf build/
 
 echo
 echo
-echo "Preparing env..."
-echo "----------------"
+echo "Installing tooling..."
+echo "---------------------"
 sudo apt-get update
 sudo apt-get install python3 python3-distutils python3-dev gcc g++ make
 curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
 python3 get-pip.py
-echo
-echo "Tools versions:"
 python3 --version
 python3 -m pip --version
 

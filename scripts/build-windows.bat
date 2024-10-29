@@ -6,6 +6,12 @@ rmdir /Q /S build
 
 echo.
 echo.
+echo Installing tooling...
+echo ---------------------
+py -3 --version
+
+echo.
+echo.
 echo Installing dependencies...
 echo --------------------------
 py -3 -m pip install -r ./requirements.txt

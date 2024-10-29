@@ -6,7 +6,7 @@ orbs:
 jobs:
   build-linux:
     docker:
-      - image: cimg/base:stable
+      - image: cimg/base:current
     resource_class: small
     steps:
       - checkout
@@ -48,7 +48,7 @@ jobs:
             - ./*.txt
   package:
     docker:
-      - image: cimg/base:stable
+      - image: cimg/base:current
     resource_class: small
     steps:
       - checkout
@@ -63,7 +63,7 @@ jobs:
             - ./*.zip
   publish:
     docker:
-      - image: cimg/base:stable
+      - image: cimg/base:current
     steps:
       - checkout
       - attach_workspace:
@@ -76,7 +76,7 @@ jobs:
           command: scripts/publish.sh
   notify:
     docker:
-      - image: cimg/base:stable
+      - image: cimg/base:current
     resource_class: small
     steps:
       - checkout

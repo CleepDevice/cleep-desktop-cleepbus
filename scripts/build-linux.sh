@@ -23,6 +23,13 @@ rm -rf venv/
 
 echo
 echo
+echo
+echo "Installing tooling..."
+echo "---------------------"
+python3 --version
+
+echo
+echo
 echo "Preparing venv..."
 echo "-----------------"
 python3 -m venv venv

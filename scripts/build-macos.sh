@@ -24,8 +24,11 @@ echo
 echo
 echo
 echo "Installing tooling..."
+echo "---------------------"
 curl -proto '=https' -tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 export PATH="$HOME/.cargo/bin:$PATH"
+rustc --version
+python3 --version
 
 echo
 echo
