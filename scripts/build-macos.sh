@@ -22,6 +22,12 @@ rm -rf build/
 
 echo
 echo
+echo
+echo "Installing tooling..."
+curl https://sh.rustup.rs -sSf | sh
+
+echo
+echo
 echo "Installing dependencies..."
 echo "--------------------------"
 python3 -m pip install -r requirements.txt
