@@ -24,7 +24,7 @@ echo
 echo
 echo
 echo "Installing tooling..."
-curl https://sh.rustup.rs -sSf | sh
+curl https://sh.rustup.rs -sSf | sh -s -- -y
 
 echo
 echo
