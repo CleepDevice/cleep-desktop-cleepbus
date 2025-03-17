@@ -3,3 +3,4 @@ pyre-gevent==0.3.1
 gevent==24.2.1
 pyinstaller==6.11
 sentry-sdk==2.17.0
+netifaces2==0.0.22

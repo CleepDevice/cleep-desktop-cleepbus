@@ -1,11 +1,16 @@
 import json
 import time
-from distutils.util import strtobool
 import logging
 import platform
 import uuid
 from pyrebus import PyreBus
-from common import InternalMessageContent, MessageRequest, PeerInfos, InternalMessage
+from common import (
+    InternalMessageContent,
+    MessageRequest,
+    PeerInfos,
+    InternalMessage,
+    strtobool,
+)
 from version import VERSION
 
 

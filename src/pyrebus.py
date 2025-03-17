@@ -9,7 +9,7 @@ import binascii
 import os
 import ipaddress
 from urllib.parse import urlparse
-import netifaces
+import netifaces2
 import netaddr
 from pyre_gevent import Pyre
 from pyre_gevent.zhelper import get_ifaddrs as zhelper_get_ifaddrs, u
@@ -106,11 +106,15 @@ class PyreBus(ExternalBus):
             for name, data in iface.items():
                 self.logger.debug('Checking out interface "%s": %s', name, data)
                 data_2 = data.get(netifaces.AF_INET, None)
+                self.logger.debug(" -> found data_2: %s", data_2)
                 data_10 = data.get(netifaces.AF_INET6, None)
+                self.logger.debug(" -> found data_10: %s", data_10)
                 data_17 = data.get(netifaces.AF_PACKET, None)
+                self.logger.debug(" -> found data_17: %s", data_17)
                 # workaround: fallback to netifaces module to find mac addr
                 if not data_17 and data_2:
                     data_17 = PyreBus.get_mac_addresses_from_netifaces(data_2)
+                    self.logger.debug(" -> found data_17 again: %s", data_17)
 
                 if not data_2 and not data_10:
                     self.logger.debug('AF_INET(6) not found for interface "%s".', name)
@@ -200,18 +204,21 @@ class PyreBus(ExternalBus):
             }
 
         """
-        adapter = data_2.get("adapter", None)
-        if not adapter:
+        try:
+            adapter = data_2.get("adapter", None)
+            if not adapter:
+                return None
+
+            addresses = netifaces.ifaddresses(adapter)
+            mac_addr = addresses.get(netifaces.AF_LINK, None)
+
+            return (
+                mac_addr[0]
+                if mac_addr and len(mac_addr) > 0 and mac_addr[0].get("addr", None)
+                else None
+            )
+        except Exception:
             return None
-
-        addresses = netifaces.ifaddresses(adapter)
-        mac_addr = addresses.get(netifaces.AF_LINK, None)
-
-        return (
-            mac_addr[0]
-            if mac_addr and len(mac_addr) > 0 and mac_addr[0].get("addr", None)
-            else None
-        )
 
     def stop(self):
         """
