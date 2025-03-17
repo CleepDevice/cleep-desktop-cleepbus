@@ -9,7 +9,7 @@ import binascii
 import os
 import ipaddress
 from urllib.parse import urlparse
-import netifaces2
+import netifaces  # netifaces2
 import netaddr
 from pyre_gevent import Pyre
 from pyre_gevent.zhelper import get_ifaddrs as zhelper_get_ifaddrs, u
