@@ -109,7 +109,12 @@ class PyreBus(ExternalBus):
                 self.logger.debug(" -> found data_2: %s", data_2)
                 data_10 = data.get(netifaces.AF_INET6, None)
                 self.logger.debug(" -> found data_10: %s", data_10)
-                data_17 = data.get(netifaces.AF_PACKET, None)
+                if hasattr(netifaces, 'AF_PACKET'): # nix
+                    data_17 = data.get(netifaces.AF_PACKET, None)
+                elif hasattr(netifaces, 'AF_NETBIOS'): # win
+                    data_17 = data.get(netifaces.AF_NETBIOS, None)
+                else:
+                    data_17 = None
                 self.logger.debug(" -> found data_17: %s", data_17)
                 # workaround: fallback to netifaces module to find mac addr
                 if not data_17 and data_2:
