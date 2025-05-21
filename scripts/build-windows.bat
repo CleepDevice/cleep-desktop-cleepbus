@@ -29,6 +29,13 @@ del /q pyinstaller.spec
 
 echo.
 echo.
+echo Run application...
+echo ------------------
+dist\cleepbus\cleepbus.exe --debug --test
+if %ERRORLEVEL% NEQ 0 goto :error
+
+echo.
+echo.
 echo Getting version
 echo ---------------
 dist\cleepbus\cleepbus.exe --version > dist\version.txt

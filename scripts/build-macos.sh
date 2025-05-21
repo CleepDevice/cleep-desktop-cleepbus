@@ -39,8 +39,8 @@ checkResult $? 0 "Failed to install python dependencies"
 
 echo
 echo
-echo "Building application..."
-echo "-----------------------"
+echo "Packaging application..."
+echo "------------------------"
 cp scripts/macos.spec pyinstaller.spec
 cp scripts/entitlements.plist entitlements.plist
 cp scripts/icon.icns icon.icns
@@ -48,6 +48,13 @@ python3 -m PyInstaller --clean --noconfirm --log-level DEBUG pyinstaller.spec
 checkResult $? 0 "Failed to build cleepbus application"
 which codesign
 rm pyinstaller.spec
+
+echo
+echo
+echo "Run application..."
+echo "------------------"
+dist/cleepbus/cleepbus --debug --test
+checkResult $? 0 "Failed to run application"
 
 echo
 echo

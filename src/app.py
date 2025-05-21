@@ -3,6 +3,7 @@ import getopt
 import sys
 from queue import Queue, Empty
 from electron import Electron
+from gevent import sleep as gsleep
 from common import InternalMessage
 from version import VERSION
 from cleepbus import CleepBus
@@ -12,6 +13,8 @@ from platform import platform, processor
 logging.basicConfig(level=logging.INFO, stream=sys.stdout)
 
 SENTRY_DSN = "https://47efccd983f44af9b37dd98c8d643ece@o97410.ingest.sentry.io/6704013"
+SENTRY_IGNORED_EXCEPTIONS = [KeyboardInterrupt]
+QUEUE_TIMEOUT = 10 # seconds
 
 
 def send_message_to_bus(message):
@@ -26,7 +29,7 @@ def process_queue():
         bool: False if application received stop order, True otherwise
     """
     try:
-        msg = shared_queue.get_nowait()
+        msg = shared_queue.get(block=True, timeout=QUEUE_TIMEOUT)
         if msg:
             if msg.message_type == InternalMessage.MESSAGE_TYPE_FROMELECTRON:
                 if msg.content == "$$STOP$$":
@@ -53,16 +56,18 @@ def show_usage():
     print(" -u|--uuid:    specify Cleep network uuid")
     print(" -p|--ws-port: websocket port (if not disabled)")
     print(" -v|--version: show cleepbus version")
+    print(" -t|--test:    lauch app and stop")
     print(" -h|--help:    this help")
 
 
 # command line arguments
 CONFIG = {"websocket": True, "uuid": None, "debug": False}
+RUN_AND_STOP = False
 try:
     opts, args = getopt.getopt(
         sys.argv[1:],
-        "nu:vdp:h",
-        ["debug", "no-ws", "uuid=", "version", "ws-port=", "help"],
+        "nu:vdp:ht",
+        ["debug", "no-ws", "uuid=", "version", "ws-port=", "help", "test"],
     )
 except Exception:
     logging.exception("Invalid command arguments")
@@ -77,7 +82,9 @@ for opt, arg in opts:
         CONFIG["websocketport"] = int(arg)
     if opt in ("-d", "--debug"):
         CONFIG["debug"] = True
-        logging.basicConfig(level=logging.DEBUG)
+        logging.basicConfig(level=logging.INFO)
+    if opt in ("-t", "--test"):
+        RUN_AND_STOP = True
     if opt in ("-v", "--version"):
         show_version()
         sys.exit(0)
@@ -89,7 +96,7 @@ logger = logging.getLogger("App")
 logger.debug("Config: %s", CONFIG)
 
 if not CONFIG.get("debug", False):
-    sentry_sdk.init(dsn=SENTRY_DSN, release=f"cleepbus@{VERSION}")
+    sentry_sdk.init(dsn=SENTRY_DSN, release=f"cleepbus@{VERSION}", ignore_errors=SENTRY_IGNORED_EXCEPTIONS)
     sentry_sdk.set_tag("platform", platform())
     sentry_sdk.set_tag("processor", processor())
     logger.info("Crash report enabled")
@@ -104,22 +111,29 @@ try:
     cleepbus.start()
     electron = Electron(shared_queue, CONFIG)
 
-    while True:
-        electron.read_message()
-        cleepbus.read_messages()
-        if electron.is_connected():
-            running = process_queue()
-            if not running:
-                logger.info("Received quit command from electron")
-                break
+    if RUN_AND_STOP:
+        logger.info('********** wait and see')
+        gsleep(10.0)
+    else:
+        while True:
+            electron.read_message()
+            cleepbus.read_messages()
+            if electron.is_connected():
+                running = process_queue()
+                if not running:
+                    logger.info("Received quit command from electron")
+                    break
+            else:
+                gsleep(1.0)
+
+except KeyboardInterrupt:
+    pass
 
 except Exception as error:
     logger.exception("Main exception")
     if not CONFIG.get("debug", False):
         sentry_sdk.capture_exception(error)
     exit_code = 1
-except KeyboardInterrupt:
-    pass
 
 try:
     cleepbus.stop()

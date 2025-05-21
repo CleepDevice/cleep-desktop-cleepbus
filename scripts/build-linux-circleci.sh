@@ -49,6 +49,13 @@ rm pyinstaller.spec
 
 echo
 echo
+echo "Run application..."
+echo "------------------"
+dist/cleepbus/cleepbus --debug --test
+checkResult $? 0 "Failed to run application"
+
+echo
+echo
 echo "Getting version..."
 echo "------------------"
 VERSION=`dist/cleepbus/cleepbus --version`

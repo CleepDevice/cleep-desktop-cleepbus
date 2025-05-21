@@ -53,12 +53,19 @@ checkResult $? 0 "Failed to install python dependencies"
 
 echo
 echo
-echo "Building application..."
-echo "-----------------------"
+echo "Packaging application..."
+echo "------------------------"
 cp scripts/linux.spec pyinstaller.spec
 python3 -m PyInstaller --clean --noconfirm --log-level INFO pyinstaller.spec
 checkResult $? 0 "Failed to build cleepbus application"
 rm pyinstaller.spec
+
+echo
+echo
+echo "Run application..."
+echo "------------------"
+dist/cleepbus/cleepbus --debug --test
+checkResult $? 0 "Failed to run application"
 
 echo
 echo
