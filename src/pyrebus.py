@@ -16,6 +16,11 @@ from pyre_gevent.zhelper import get_ifaddrs as zhelper_get_ifaddrs, u
 import zmq.green as zmq
 from externalbus import ExternalBus
 from common import MessageRequest
+from gevent import sleep as gsleep
+
+AF_INET = 2
+AF_INET6 = 10
+AF_PACKET = 17
 
 
 class PyreBus(ExternalBus):
@@ -105,16 +110,11 @@ class PyreBus(ExternalBus):
             # ipv4 only currently and needs a valid broadcast address
             for name, data in iface.items():
                 self.logger.debug('Checking out interface "%s": %s', name, data)
-                data_2 = data.get(netifaces.AF_INET, None)
+                data_2 = data.get(AF_INET, None)
                 self.logger.debug(" -> found data_2: %s", data_2)
-                data_10 = data.get(netifaces.AF_INET6, None)
+                data_10 = data.get(AF_INET6, None)
                 self.logger.debug(" -> found data_10: %s", data_10)
-                if hasattr(netifaces, 'AF_PACKET'): # nix
-                    data_17 = data.get(netifaces.AF_PACKET, None)
-                elif hasattr(netifaces, 'AF_NETBIOS'): # win
-                    data_17 = data.get(netifaces.AF_NETBIOS, None)
-                else:
-                    data_17 = None
+                data_17 = data.get(AF_PACKET, None)
                 self.logger.debug(" -> found data_17: %s", data_17)
                 # workaround: fallback to netifaces module to find mac addr
                 if not data_17 and data_2:
@@ -122,7 +122,7 @@ class PyreBus(ExternalBus):
                     self.logger.debug(" -> found data_17 again: %s", data_17)
 
                 if not data_2 and not data_10:
-                    self.logger.debug('AF_INET(6) not found for interface "%s".', name)
+                    self.logger.debug('AF_INET(2) + AF_INET6(10) not found for interface "%s".', name)
                     continue
                 if not data_17:
                     self.logger.debug(
@@ -233,7 +233,7 @@ class PyreBus(ExternalBus):
         if self.pipe_in is not None:
             self.logger.debug("Send STOP on pipe")
             self.pipe_in.send(json.dumps(self.BUS_STOP).encode("utf-8"))
-            time.sleep(0.15)
+            gsleep(0.15)
 
             # and close everything
             self.pipe_in.close()
@@ -252,7 +252,7 @@ class PyreBus(ExternalBus):
                     self.logger.exception("Exception stopping pyre node")
             except Exception:
                 self.logger.exception("Exception stopping pyre node")
-            time.sleep(0.15)
+            gsleep(0.15)
             self.node = None
             self.node_socket = None
             self.poller = None
@@ -521,7 +521,7 @@ class PyreBus(ExternalBus):
             try:
                 if not self.__externalbus_configured:
                     # bus not configured (no network yet?), pause
-                    time.sleep(0.25)
+                    gsleep(0.25)
 
                 elif not self.run_once():
                     # stop requested

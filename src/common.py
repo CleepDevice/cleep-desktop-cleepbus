@@ -493,14 +493,20 @@ class MessageRequest:
             self.peer_infos = PeerInfos()
             self.peer_infos.fill_from_dict(message.get("peer_infos"))
 
-_true_set = {'yes', 'true', 't', 'y', '1'}
-_false_set = {'no', 'false', 'f', 'n', '0'}
+
+_true_set = {"yes", "true", "t", "y", "1"}
+_false_set = {"no", "false", "f", "n", "0"}
+
 
 def str2bool(value: str, raise_exc=False) -> bool:
     """
     Code from https://github.com/symonsoft/str2bool
     """
-    if isinstance(value, str) or sys.version_info[0] < 3 and isinstance(value, basestring):
+    if (
+        isinstance(value, str)
+        or sys.version_info[0] < 3
+        and isinstance(value, basestring)
+    ):
         value = value.lower()
         if value in _true_set:
             return True

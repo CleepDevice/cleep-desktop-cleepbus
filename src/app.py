@@ -14,7 +14,7 @@ logging.basicConfig(level=logging.INFO, stream=sys.stdout)
 
 SENTRY_DSN = "https://47efccd983f44af9b37dd98c8d643ece@o97410.ingest.sentry.io/6704013"
 SENTRY_IGNORED_EXCEPTIONS = [KeyboardInterrupt]
-QUEUE_TIMEOUT = 10 # seconds
+QUEUE_TIMEOUT = 10  # seconds
 
 
 def send_message_to_bus(message):
@@ -96,7 +96,11 @@ logger = logging.getLogger("App")
 logger.debug("Config: %s", CONFIG)
 
 if not CONFIG.get("debug", False):
-    sentry_sdk.init(dsn=SENTRY_DSN, release=f"cleepbus@{VERSION}", ignore_errors=SENTRY_IGNORED_EXCEPTIONS)
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        release=f"cleepbus@{VERSION}",
+        ignore_errors=SENTRY_IGNORED_EXCEPTIONS,
+    )
     sentry_sdk.set_tag("platform", platform())
     sentry_sdk.set_tag("processor", processor())
     logger.info("Crash report enabled")
@@ -112,7 +116,6 @@ try:
     electron = Electron(shared_queue, CONFIG)
 
     if RUN_AND_STOP:
-        logger.info('********** wait and see')
         gsleep(10.0)
     else:
         while True:

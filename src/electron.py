@@ -1,7 +1,7 @@
 import logging
 import websocket
-import time
 import json
+from gevent import sleep as gsleep
 from common import InternalMessage
 
 
@@ -63,7 +63,7 @@ class Electron:
             self.logger.info(
                 "Websocket server is not available. Retrying in few seconds"
             )
-            time.sleep(1)
+            gsleep(1)
 
     def read_message(self):
         """
