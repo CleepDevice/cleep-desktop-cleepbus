@@ -1,8 +1,8 @@
 version: 2.1
 orbs:
-  win: circleci/windows@5.0.0
-  slack: circleci/slack@4.10.1
-  gh: circleci/github-cli@2.0
+  win: circleci/windows@5.1.0
+  slack: circleci/slack@5.1.1
+  gh: circleci/github-cli@2.7.0
 jobs:
   build-linux:
     docker:
