@@ -27,8 +27,9 @@ echo "Installing tooling..."
 echo "---------------------"
 curl -proto '=https' -tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 export PATH="$HOME/.cargo/bin:$PATH"
-rustc --version
-python3 --version
+echo rust version: `rustc --version`
+echo python version: `python3 --version`
+echo pip version: `python3 -m pip --version`
 
 echo
 echo

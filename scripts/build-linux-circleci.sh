@@ -22,14 +22,19 @@ rm -rf build/
 
 echo
 echo
-echo "Installing tooling..."
-echo "---------------------"
+echo "Installing tools..."
+echo "-------------------"
 sudo apt-get update
-sudo apt-get install python3 python3-distutils python3-dev gcc g++ make
+sudo apt-get install python3 python3-setuptools python3-dev python3-venv gcc g++ make
+checkResult $? 0 "Failed to install tools"
+python3 -m venv .venv
+source .venv/bin/activate
 curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
 python3 get-pip.py
-python3 --version
-python3 -m pip --version
+checkResult $? 0 "Failed to install pip"
+echo python version: `python3 --version`
+echo pip version: `python3 -m pip --version`
+
 
 echo
 echo

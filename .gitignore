@@ -4,4 +4,5 @@ temp/
 build/
 dist/
 packaging/
+.venv
 venv
