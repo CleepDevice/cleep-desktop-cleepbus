@@ -40,7 +40,7 @@ jobs:
       - run:
           name: Install certificate
           command: |
-            curl -sS --output cert.p12 "$CSC_LINK"
+            curl -sS --location --fail --output cert.p12 $CSC_LINK
             ls -l
             echo "create-keychain"
             security create-keychain -p "" build.keychain
