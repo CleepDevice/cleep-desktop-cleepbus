@@ -45,7 +45,7 @@ echo "------------------------"
 cp scripts/macos.spec pyinstaller.spec
 cp scripts/entitlements.plist entitlements.plist
 cp scripts/icon.icns icon.icns
-python3 -m PyInstaller --codesign-identity "$CSC_IDENTITY" --clean --noconfirm --log-level DEBUG pyinstaller.spec
+python3 -m PyInstaller --clean --noconfirm --log-level DEBUG pyinstaller.spec -- --identity="$CSC_IDENTITY"
 checkResult $? 0 "Failed to build cleepbus application"
 which codesign
 rm pyinstaller.spec

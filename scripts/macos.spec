@@ -2,6 +2,11 @@
 
 from PyInstaller.utils.hooks import collect_submodules
 from src.version import VERSION
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument("-i", "--identity")
+options = parser.parse_args()
 
 block_cipher = None
 sentry_sdk_submodules = collect_submodules('sentry_sdk')
@@ -25,17 +30,33 @@ a = Analysis(['src/app.py'],
 pyz = PYZ(a.pure, a.zipped_data,
              cipher=block_cipher)
 
-exe = EXE(pyz,
-          a.scripts,
-          exclude_binaries=True,
-          name='cleepbus',
-          debug=False,
-          strip=False,
-          upx=False,
-          console=True,
-          icon='icon.icns',
-          target_arch='arm64',
-          entitlements_file='entitlements.plist')
+if options.identity:
+   print(f" -> Signing with identity: {options.identity}")
+   exe = EXE(pyz,
+            a.scripts,
+            exclude_binaries=True,
+            name='cleepbus',
+            debug=False,
+            strip=False,
+            upx=False,
+            console=True,
+            icon='icon.icns',
+            target_arch='arm64',
+            entitlements_file='entitlements.plist',
+            codesign_identity=options.identity)
+else:
+   print(f" -> No signing")
+   exe = EXE(pyz,
+            a.scripts,
+            exclude_binaries=True,
+            name='cleepbus',
+            debug=False,
+            strip=False,
+            upx=False,
+            console=True,
+            icon='icon.icns',
+            target_arch='arm64',
+            entitlements_file='entitlements.plist')
 
 coll = COLLECT(exe,
                a.binaries,
