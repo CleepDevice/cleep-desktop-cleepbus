@@ -37,6 +37,15 @@ jobs:
       xcode: 16.0.0
     resource_class: macos.m1.medium.gen1
     steps:
+      - run:
+          name: Install certificate
+          command: |
+            curl --output cert.p12 "$CSC_LINK"
+            security create-keychain -p "" build.keychain
+            security default-keychain -s build.keychain
+            security unlock-keychain -p "" build.keychain
+            security import cert.p12 -k build.keychain -P "$CSC_KEY_PASSWORD" -T /usr/bin/codesign
+            security set-key-partition-list -S apple-tool:,apple: -s -k "" build.keychain
       - checkout
       - run:
           name: Building
