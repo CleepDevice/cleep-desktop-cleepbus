@@ -40,6 +40,13 @@ checkResult $? 0 "Failed to install python dependencies"
 
 echo
 echo
+echo "Available signing identities"
+echo "----------------------------"
+security find-identity
+security list-keychains
+
+echo
+echo
 echo "Packaging application..."
 echo "------------------------"
 cp scripts/macos.spec pyinstaller.spec

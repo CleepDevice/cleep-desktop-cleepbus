@@ -31,7 +31,7 @@ pyz = PYZ(a.pure, a.zipped_data,
              cipher=block_cipher)
 
 if options.identity:
-   print(f" -> Signing with identity: {options.identity}")
+   print(f" ==> Signing with identity: {options.identity}")
    exe = EXE(pyz,
             a.scripts,
             exclude_binaries=True,
@@ -45,7 +45,7 @@ if options.identity:
             entitlements_file='entitlements.plist',
             codesign_identity=options.identity)
 else:
-   print(f" -> No signing")
+   print(f" ==> No signing")
    exe = EXE(pyz,
             a.scripts,
             exclude_binaries=True,
