@@ -40,11 +40,17 @@ jobs:
       - run:
           name: Install certificate
           command: |
-            curl --output cert.p12 "$CSC_LINK"
+            curl -sS --output cert.p12 "$CSC_LINK"
+            ls -l
+            echo "create-keychain"
             security create-keychain -p "" build.keychain
+            echo "default-keychain"
             security default-keychain -s build.keychain
+            echo "unlock-keychain"
             security unlock-keychain -p "" build.keychain
+            echo "import"
             security import cert.p12 -k build.keychain -P "$CSC_KEY_PASSWORD" -T /usr/bin/codesign
+            echo "set-key-partition-list"
             security set-key-partition-list -S apple-tool:,apple: -s -k "" build.keychain
       - checkout
       - run:
