@@ -19,7 +19,8 @@ checkResult() {
 # env
 VERSION=`cat dist/version.txt | tr -d "\r" | xargs`
 PLATFORM=`cat dist/platform.txt | tr -d "\r" | xargs`
-ARCHIVE="cleepbus-v$VERSION-$PLATFORM-x64.zip"
+ARCH=`cat dist/arch.txt | tr -d "\r" | xargs`
+ARCHIVE="cleepbus-v$VERSION-$PLATFORM-$ARCH.zip"
 mkdir package
 
 echo

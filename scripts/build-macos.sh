@@ -73,6 +73,7 @@ checkResult $? 0 "Failed to get cleepbus version"
 echo $VERSION > dist/version.txt
 echo "Found version $VERSION"
 echo macos > dist/platform.txt
+echo arm64 > dist/arch.txt
 
 echo
 echo

@@ -67,6 +67,7 @@ VERSION=`dist/cleepbus/cleepbus --version`
 echo $VERSION > dist/version.txt
 echo "Found version $VERSION"
 echo linux > dist/platform.txt
+echo x64 > dist/arch.txt
 
 echo
 echo

@@ -43,6 +43,7 @@ if %ERRORLEVEL% NEQ 0 goto :error
 set /P VERSION=<dist\version.txt
 echo Found version "%VERSION%"
 echo windows > dist\platform.txt
+echo x64 > dist\arch.txt
 
 echo.
 echo.
