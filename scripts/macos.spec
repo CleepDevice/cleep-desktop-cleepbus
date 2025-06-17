@@ -31,7 +31,7 @@ pyz = PYZ(a.pure, a.zipped_data,
              cipher=block_cipher)
 
 if options.identity:
-   print(f" ==> Signing with identity: {options.identity}")
+   print(f" ==> Signing binaries")
    exe = EXE(pyz,
             a.scripts,
             exclude_binaries=True,
